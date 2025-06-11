@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
+        'address',
+        'company_name',
+        'status',
     ];
 
     /**
@@ -40,5 +45,62 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is vendor
+     */
+    public function isVendor()
+    {
+        return $this->role === 'vendor';
+    }
+
+    /**
+     * Check if user is buyer
+     */
+    public function isBuyer()
+    {
+        return $this->role === 'buyer';
+    }
+
+    /**
+     * Check if user is manufacturer
+     */
+    public function isManufacturer()
+    {
+        return $this->role === 'manufacturer';
+    }
+
+    /**
+     * Get the user's full display name with role
+     */
+    public function getDisplayNameAttribute()
+    {
+        return $this->name . ' (' . ucfirst($this->role) . ')';
+    }
+
+    /**
+     * Scope to get users by role
+     */
+    public function scopeByRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
+
+    /**
+     * Scope to get active users
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }
