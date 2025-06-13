@@ -1,0 +1,665 @@
+<?php
+
+
+
+namespace App\Http\Controllers;
+
+use App\Models\Device;
+use App\Models\DeviceCategory;
+use App\Models\BuyerProfile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+
+class DeviceController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Display a listing of devices
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $query = Device::with(['category', 'vendor', 'buyer', 'buyerProfile']);
+
+        // Filter based on user role
+        if ($user->isVendor()) {
+            $query->byVendor($user->id);
+        } elseif ($user->isBuyer()) {
+            $query->byBuyer($user->id);
+        }
+
+        // Apply filters
+        if ($request->filled('status')) {
+            $query->byStatus($request->status);
+        }
+
+        if ($request->filled('buyer_category')) {
+            $query->byBuyerCategory($request->buyer_category);
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('unique_identifier', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('brand', 'like', "%{$search}%");
+            });
+        }
+
+        $devices = $query->orderBy('created_at', 'desc')->paginate(20);
+        $categories = DeviceCategory::all();
+
+        return view('devices.index', compact('devices', 'categories'));
+    }
+
+    /**
+     * Show the form for creating a new device
+     */
+    public function create()
+    {
+        $this->authorize('create', Device::class);
+        
+        $categories = DeviceCategory::all();
+        return view('devices.create', compact('categories'));
+    }
+
+    /**
+     * Store a newly created device
+     */
+    public function store(Request $request)
+    {
+        $this->authorize('create', Device::class);
+
+        $validated = $request->validate([
+            'unique_identifier' => 'required|string|unique:devices,unique_identifier',
+            'device_type' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'brand' => 'nullable|string|max:255',
+            'specifications' => 'nullable|string',
+            'category_id' => 'required|exists:device_categories,id',
+            'price' => 'nullable|numeric|min:0',
+            'warranty_expiry' => 'nullable|date|after:today',
+            
+            // Buyer information
+            'buyer_full_name' => 'nullable|string|max:255',
+            'buyer_phone' => 'nullable|string|max:20',
+            'buyer_address' => 'nullable|string',
+            'buyer_city' => 'nullable|string|max:255',
+            'buyer_state' => 'nullable|string|max:255',
+            'buyer_country' => 'nullable|string|max:255',
+            'buyer_id_type' => 'nullable|string|max:50',
+            'buyer_id_number' => 'nullable|string|max:50',
+            'buyer_category' => 'nullable|in:individual,institution,corporate',
+            'institution_name' => 'nullable|string|max:255',
+            'tax_id' => 'nullable|string|max:50',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $device = Device::create([
+                'unique_identifier' => $validated['unique_identifier'],
+                'device_type' => $validated['device_type'],
+                'model' => $validated['model'],
+                'brand' => $validated['brand'],
+                'specifications' => $validated['specifications'],
+                'category_id' => $validated['category_id'],
+                'vendor_id' => Auth::id(),
+                'price' => $validated['price'],
+                'warranty_expiry' => $validated['warranty_expiry'],
+                'buyer_category' => $validated['buyer_category'],
+                'purchase_date' => now(),
+            ]);
+
+            // Create buyer profile if buyer information is provided
+            if ($request->filled('buyer_full_name')) {
+                $buyerProfile = $this->createOrUpdateBuyerProfile($validated);
+                $device->update(['buyer_id' => $buyerProfile->user_id]);
+            }
+
+            DB::commit();
+            return redirect()->route('devices.index')
+                ->with('success', 'Device registered successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors(['error' => 'Failed to register device: ' . $e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Display the specified device
+     */
+    public function show(Device $device)
+    {
+        $this->authorize('view', $device);
+        
+        $device->load(['category', 'vendor', 'buyer', 'buyerProfile', 'transfers.fromUser', 'transfers.toUser']);
+        
+        return view('devices.show', compact('device'));
+    }
+
+    /**
+     * Show the form for editing the device
+     */
+    public function edit(Device $device)
+    {
+        $this->authorize('update', $device);
+        
+        $categories = DeviceCategory::all();
+        $device->load('buyerProfile');
+        
+        return view('devices.edit', compact('device', 'categories'));
+    }
+
+    /**
+     * Update the specified device
+     */
+    public function update(Request $request, Device $device)
+    {
+        $this->authorize('update', $device);
+
+        $validated = $request->validate([
+            'device_type' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'brand' => 'nullable|string|max:255',
+            'specifications' => 'nullable|string',
+            'category_id' => 'required|exists:device_categories,id',
+            'price' => 'nullable|numeric|min:0',
+            'warranty_expiry' => 'nullable|date',
+            'status' => ['required', Rule::in(['active', 'needs_attention', 'replacement_needed', 'stolen'])],
+        ]);
+
+        $device->update($validated);
+
+        return redirect()->route('devices.show', $device)
+            ->with('success', 'Device updated successfully!');
+    }
+
+    /**
+     * Update device status
+     */
+    public function updateStatus(Request $request, Device $device)
+    {
+        $this->authorize('updateStatus', $device);
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['active', 'needs_attention', 'replacement_needed', 'stolen'])],
+            'notes' => 'nullable|string',
+        ]);
+
+        $device->update(['status' => $validated['status']]);
+
+        return back()->with('success', 'Device status updated successfully!');
+    }
+
+    /**
+     * Transfer device to new owner
+     */
+    public function transfer(Request $request, Device $device)
+    {
+        $this->authorize('transfer', $device);
+
+        $validated = $request->validate([
+            'buyer_email' => 'required|email|exists:users,email',
+            'transfer_type' => 'required|in:sale,transfer,return',
+            'amount' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+        ]);
+
+        $newBuyer = User::where('email', $validated['buyer_email'])->first();
+
+        DB::beginTransaction();
+        try {
+            // Create transfer record
+            $device->transfers()->create([
+                'from_user_id' => $device->buyer_id,
+                'to_user_id' => $newBuyer->id,
+                'transfer_type' => $validated['transfer_type'],
+                'amount' => $validated['amount'],
+                'notes' => $validated['notes'],
+                'transfer_date' => now(),
+            ]);
+
+            // Update device owner
+            $device->update(['buyer_id' => $newBuyer->id]);
+
+            DB::commit();
+            return redirect()->route('devices.show', $device)
+                ->with('success', 'Device transferred successfully!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors(['error' => 'Transfer failed: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Create or update buyer profile
+     */
+    private function createOrUpdateBuyerProfile(array $data)
+    {
+        // Find or create user based on email (simplified for this example)
+        // In production, you might want a more sophisticated user matching
+        $user = User::firstOrCreate(
+            ['email' => $data['buyer_email'] ?? 'buyer@' . time() . '.com'],
+            [
+                'name' => $data['buyer_full_name'],
+                'role' => 'buyer',
+                'password' => bcrypt('temporary123'), // Should be changed on first login
+            ]
+        );
+
+        return BuyerProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'full_name' => $data['buyer_full_name'],
+                'phone' => $data['buyer_phone'],
+                'address' => $data['buyer_address'],
+                'city' => $data['buyer_city'],
+                'state' => $data['buyer_state'],
+                'country' => $data['buyer_country'] ?? 'Nigeria',
+                'id_type' => $data['buyer_id_type'],
+                'id_number' => $data['buyer_id_number'],
+                'buyer_type' => $data['buyer_category'] ?? 'individual',
+                'institution_name' => $data['institution_name'],
+                'tax_id' => $data['tax_id'],
+            ]
+        );
+    }
+}
+
+// Controller: DeviceCategoryController.php
+namespace App\Http\Controllers;
+
+use App\Models\DeviceCategory;
+use Illuminate\Http\Request;
+
+class DeviceCategoryController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:admin,manufacturer');
+    }
+
+    public function index()
+    {
+        $categories = DeviceCategory::withCount('devices')->get();
+        return view('device-categories.index', compact('categories'));
+    }
+
+    public function create()
+    {
+        return view('device-categories.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:device_categories,name',
+            'description' => 'nullable|string',
+        ]);
+
+        DeviceCategory::create($validated);
+
+        return redirect()->route('device-categories.index')
+            ->with('success', 'Device category created successfully!');
+    }
+
+    public function edit(DeviceCategory $deviceCategory)
+    {
+        return view('device-categories.edit', compact('deviceCategory'));
+    }
+
+    public function update(Request $request, DeviceCategory $deviceCategory)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:device_categories,name,' . $deviceCategory->id,
+            'description' => 'nullable|string',
+        ]);
+
+        $deviceCategory->update($validated);
+
+        return redirect()->route('device-categories.index')
+            ->with('success', 'Device category updated successfully!');
+    }
+
+    public function destroy(DeviceCategory $deviceCategory)
+    {
+        if ($deviceCategory->devices()->count() > 0) {
+            return back()->withErrors(['error' => 'Cannot delete category with associated devices.']);
+        }
+
+        $deviceCategory->delete();
+
+        return redirect()->route('device-categories.index')
+            ->with('success', 'Device category deleted successfully!');
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class HomeController extends Controller
+{
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $dashboardData = $this->getDashboardData($user);
+        
+        return view('home', compact('user', 'dashboardData'));
+    }
+    
+    /**
+     * Get dashboard data based on user role
+     */
+    private function getDashboardData($user)
+    {
+        $data = [];
+        
+        switch ($user->role) {
+            case 'admin':
+                $data = [
+                    'total_users' => \App\Models\User::count(),
+                    'total_vendors' => \App\Models\User::where('role', 'vendor')->count(),
+                    'total_buyers' => \App\Models\User::where('role', 'buyer')->count(),
+                    'recent_registrations' => \App\Models\User::latest()->limit(5)->get(),
+                ];
+                break;
+                
+            case 'vendor':
+                // TODO: Add device and sales data when models are created
+                $data = [
+                    'total_devices' => 0, // Will be updated when Device model is created
+                    'devices_sold' => 0,
+                    'pending_reports' => 0,
+                    'monthly_sales' => 0,
+                ];
+                break;
+                
+            case 'buyer':
+                // TODO: Add device and report data when models are created
+                $data = [
+                    'owned_devices' => 0, // Will be updated when Device model is created
+                    'active_reports' => 0,
+                    'resolved_reports' => 0,
+                ];
+                break;
+                
+            case 'manufacturer':
+                // TODO: Add manufacturing data when models are created
+                $data = [
+                    'total_devices' => 0,
+                    'fault_reports' => 0,
+                    'performance_metrics' => [],
+                ];
+                break;
+        }
+        
+        return $data;
+    }
+}
+
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse; // Add this line
+
+class RegisterController extends Controller
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Register Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles the registration of new users as well as their
+    | validation and creation. By default this controller uses a trait to
+    | provide this functionality without requiring any additional code.
+    |
+    */
+
+    use RegistersUsers;
+
+    /**
+     * Where to redirect users after registration.
+     *
+     * @var string
+     */
+    protected $redirectTo = '/home';
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('guest');
+    }
+
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validator(array $data)
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'in:buyer,vendor'],
+            'phone' => ['nullable', 'string', 'max:20'],
+        ];
+
+        // Add company name validation for vendors
+        if (isset($data['role']) && $data['role'] === 'vendor') {
+            $rules['company_name'] = ['required', 'string', 'max:255'];
+        }
+
+        return Validator::make($data, $rules);
+    }
+
+    /**
+     * Create a new user instance after a valid registration.
+     *
+     * @param  array  $data
+     * @return \App\Models\User
+     */
+    protected function create(array $data)
+    {
+        return User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => $data['role'],
+            'phone' => $data['phone'] ?? null,
+            'company_name' => $data['company_name'] ?? null,
+            'status' => 'active',
+        ]);
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        $user = $this->create($request->all());
+
+        $this->guard()->login($user);
+
+        if ($response = $this->registered($request, $user)) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+                        ? new JsonResponse([], 201)
+                        : redirect($this->redirectPath())->with('success', 'Registration successful! Welcome to BDIC Device Management System.');
+    }
+}
+
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CheckRole
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next, ...$roles): Response
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $user = auth()->user();
+        
+        if (!in_array($user->role, $roles)) {
+            abort(403, 'Access denied. You do not have permission to access this resource.');
+        }
+
+        return $next($request);
+    }
+}
+
+
+
+
+<?php
+
+
+
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DeviceCategoryController;
+use Illuminate\Support\Facades\Route;
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+
+// Routes: web.php (Device Management Routes)
+
+
+
+
+// Device Management Routes
+Route::middleware(['auth'])->group(function () {
+    
+    // Device Routes
+    Route::resource('devices', DeviceController::class);
+    Route::patch('devices/{device}/status', [DeviceController::class, 'updateStatus'])->name('devices.update-status');
+    Route::post('devices/{device}/transfer', [DeviceController::class, 'transfer'])->name('devices.transfer');
+    
+    // Device Category Routes (Admin/Manufacturer only)
+    Route::middleware(['role:admin,manufacturer'])->group(function () {
+        Route::resource('device-categories', DeviceCategoryController::class);
+    });
+    
+    // Dashboard Routes by Role
+    Route::get('vendor/dashboard', function () {
+        return view('dashboards.vendor');
+    })->middleware('role:vendor')->name('vendor.dashboard');
+    
+    Route::get('buyer/dashboard', function () {
+        return view('dashboards.buyer');
+    })->middleware('role:buyer')->name('buyer.dashboard');
+    
+    Route::get('admin/dashboard', function () {
+        return view('dashboards.admin');
+    })->middleware('role:admin')->name('admin.dashboard');
+    
+    Route::get('manufacturer/dashboard', function () {
+        return view('dashboards.manufacturer');
+    })->middleware('role:manufacturer')->name('manufacturer.dashboard');
+});
+
+// API Routes for AJAX calls
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    Route::get('devices/search', [DeviceController::class, 'search'])->name('api.devices.search');
+    Route::get('users/search', function (Request $request) {
+        $users = User::where('email', 'like', '%' . $request->q . '%')
+                    ->orWhere('name', 'like', '%' . $request->q . '%')
+                    ->limit(10)
+                    ->get(['id', 'name', 'email', 'role']);
+        return response()->json($users);
+    })->name('api.users.search');
+    
+    Route::get('devices/{device}/history', function (Device $device) {
+        $transfers = $device->transfers()->with(['fromUser', 'toUser'])->get();
+        return response()->json($transfers);
+    })->name('api.devices.history');
+});
+
+

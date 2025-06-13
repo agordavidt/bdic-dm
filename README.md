@@ -1,66 +1,18 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Project Requirements Document
+Feature ID	Description	User Story	Expected Behavior/Outcome
+FR001	Device Registration with Unique Identifiers	As a vendor, I want to register a sold device with a unique identifier so that it can be tracked throughout its lifecycle.	The system should successfully record the device with its unique identifier (e.g., PG or serial number) and link it to the vendor's profile. 
+FR002	Device Detail and Buyer Information Entry	As a vendor, I want to enter device details and buyer information during registration so that comprehensive records are maintained.	The system should prompt for and store device specifics (e.g., type, model) and buyer data (name, contact info, location, ID) upon registration. 
+FR003	Buyer Category Tagging for Devices	As a vendor, I want to tag registered devices based on buyer category (individual, institution, corporate) so that analytics and support can be targeted.	The system should allow selection of a buyer category during device registration and associate it with the device and buyer records. 
+FR004	Distributor and Marketer Onboarding	As a system administrator, I want to onboard new vendors via the platform so that they can manage their inventory and sales.	The system should provide a clear process for creating new vendor profiles, including their allocated inventory and sales history. 
+FR005	Tracking Vendor Sales and Performance Metrics	As a system administrator or BDIC management, I want to track vendor sales history and performance metrics so that I can assess their effectiveness.	The system should display real-time sales data and performance metrics for each vendor, accessible via their profiles. 
+FR006	Buyer Identity Tracking and Purchase History	As BDIC management, I want to track buyer identities and their purchase history so that I can provide targeted support and analytics.	The system should securely store buyer names, contact information, location, ID, and a history of their device purchases. 
+FR007	End-User Fault Reporting	As an end-user, I want to report device faults via the portal so that I can receive after-sales support.	The system should provide a user-friendly interface for submitting fault reports, allowing for text descriptions and optional image uploads. 
+FR008	Real-time Fault Reporting Dashboard	As a vendor or manufacturer, I want to view reported faults on a real-time dashboard so that I can respond promptly to issues.	The system should display a centralized, real-time dashboard showing all reported incidents, sortable by device ID and location. 
+FR009	Device Flagging for Attention/Replacement	As a support team member, I want to flag devices needing attention or replacement based on reported faults so that their status is clear.	The system should allow support personnel to change the status of a device to "needs attention" or "replacement" based on fault reports. 
+FR010	Stolen Device Flagging by Buyers	As a buyer, I want to flag my device as stolen so that security measures can be initiated.	The system should provide an option for buyers to report their registered devices as stolen, updating the device's status. 
+FR011	Remote Tracking and Shutdown Capability	As BDIC IT or support, I want to remotely track or shut down a stolen device so that I can enhance security and prevent unauthorized use.	For supported Android/Windows-based devices, the system should allow authorized personnel to initiate remote tracking or shutdown commands. 
+FR012	Geographical Sales Analytics	As BDIC management, I want to view geographical sales analytics so that I can understand market demand and distribution.	The system should generate reports and visualizations showing device distribution and sales performance by location. 
+FR013	Integration with BDIC Cloud Storage	As a system administrator, I want all device data, buyer records, and reports to be integrated with BDIC Cloud Storage so that data is centralized and secure.	The system should automatically backup and store all relevant data in BDIC Cloud Storage, enabling big data analytics and product lifecycle tracking. 
+FR014	Role-Based Access Control	As a user, I want secure access to the system based on my role so that I can only access relevant functionalities.	The system should implement a robust authentication and authorization system that grants access to specific features based on user roles (Vendor, Admin, Manufacturer, Buyer). 
+FR015	E-commerce Listing for Vendors	As a vendor, I want to list devices for direct customer purchases so that I can expand my sales channels.	The system should provide an interface for vendors to create product listings with descriptions, specifications, and images for online sales. 
+FR016	Secure E-commerce Checkout	As a customer, I want a secure checkout process when purchasing devices online so that my payment information is protected.	The system should integrate a secure payment gateway for online transactions and facilitate communication between buyers and vendors. 

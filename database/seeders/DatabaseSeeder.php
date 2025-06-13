@@ -29,18 +29,18 @@ class DatabaseSeeder extends Seeder
             'email' => 'vendor@example.com',
             'password' => Hash::make('password123'),
             'role' => 'vendor',
-            'phone' => '+234-800-VENDOR-01',
+            'phone' => '+234-800-77653-01',
             'company_name' => 'Tech Solutions Ltd',
             'status' => 'active',
         ]);
 
         // Create sample buyer
         User::create([
-            'name' => 'Jane Buyer',
+            'name' => 'Susan Buyer',
             'email' => 'buyer@example.com',
             'password' => Hash::make('password123'),
             'role' => 'buyer',
-            'phone' => '+234-800-BUYER-01',
+            'phone' => '+234-800-34345-01',
             'status' => 'active',
         ]);
 
@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'manufacturer@bdic.com',
             'password' => Hash::make('password123'),
             'role' => 'manufacturer',
-            'phone' => '+234-800-BDIC-MFG',
+            'phone' => '+234-800-2344-453',
             'company_name' => 'BDIC Manufacturing',
             'status' => 'active',
         ]);
