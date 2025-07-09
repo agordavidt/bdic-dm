@@ -1,8 +1,76 @@
-<?php
-
-
+-- Controllers<?php
 
 namespace App\Http\Controllers;
+
+use App\Models\DeviceCategory;
+use Illuminate\Http\Request;
+
+class DeviceCategoryController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:admin,manufacturer');
+    }
+
+    public function index()
+    {
+        $categories = DeviceCategory::withCount('devices')->get();
+        return view('device-categories.index', compact('categories'));
+    }
+
+    public function create()
+    {
+        return view('device-categories.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:device_categories,name',
+            'description' => 'nullable|string',
+        ]);
+
+        DeviceCategory::create($validated);
+
+        return redirect()->route('device-categories.index')
+            ->with('success', 'Device category created successfully!');
+    }
+
+    public function edit(DeviceCategory $deviceCategory)
+    {
+        return view('device-categories.edit', compact('deviceCategory'));
+    }
+
+    public function update(Request $request, DeviceCategory $deviceCategory)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:device_categories,name,' . $deviceCategory->id,
+            'description' => 'nullable|string',
+        ]);
+
+        $deviceCategory->update($validated);
+
+        return redirect()->route('device-categories.index')
+            ->with('success', 'Device category updated successfully!');
+    }
+
+    public function destroy(DeviceCategory $deviceCategory)
+    {
+        if ($deviceCategory->devices()->count() > 0) {
+            return back()->withErrors(['error' => 'Cannot delete category with associated devices.']);
+        }
+
+        $deviceCategory->delete();
+
+        return redirect()->route('device-categories.index')
+            ->with('success', 'Device category deleted successfully!');
+    }
+}
+
+
+
+amespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Models\DeviceCategory;
@@ -277,322 +345,19 @@ class DeviceController extends Controller
     }
 }
 
-// Controller: DeviceCategoryController.php
-namespace App\Http\Controllers;
-
-use App\Models\DeviceCategory;
-use Illuminate\Http\Request;
-
-class DeviceCategoryController extends Controller
-{
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('role:admin,manufacturer');
-    }
-
-    public function index()
-    {
-        $categories = DeviceCategory::withCount('devices')->get();
-        return view('device-categories.index', compact('categories'));
-    }
-
-    public function create()
-    {
-        return view('device-categories.create');
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:device_categories,name',
-            'description' => 'nullable|string',
-        ]);
-
-        DeviceCategory::create($validated);
-
-        return redirect()->route('device-categories.index')
-            ->with('success', 'Device category created successfully!');
-    }
-
-    public function edit(DeviceCategory $deviceCategory)
-    {
-        return view('device-categories.edit', compact('deviceCategory'));
-    }
-
-    public function update(Request $request, DeviceCategory $deviceCategory)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:device_categories,name,' . $deviceCategory->id,
-            'description' => 'nullable|string',
-        ]);
-
-        $deviceCategory->update($validated);
-
-        return redirect()->route('device-categories.index')
-            ->with('success', 'Device category updated successfully!');
-    }
-
-    public function destroy(DeviceCategory $deviceCategory)
-    {
-        if ($deviceCategory->devices()->count() > 0) {
-            return back()->withErrors(['error' => 'Cannot delete category with associated devices.']);
-        }
-
-        $deviceCategory->delete();
-
-        return redirect()->route('device-categories.index')
-            ->with('success', 'Device category deleted successfully!');
-    }
-}
-
-
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
-class HomeController extends Controller
-{
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function index()
-    {
-        $user = Auth::user();
-        $dashboardData = $this->getDashboardData($user);
-        
-        return view('home', compact('user', 'dashboardData'));
-    }
-    
-    /**
-     * Get dashboard data based on user role
-     */
-    private function getDashboardData($user)
-    {
-        $data = [];
-        
-        switch ($user->role) {
-            case 'admin':
-                $data = [
-                    'total_users' => \App\Models\User::count(),
-                    'total_vendors' => \App\Models\User::where('role', 'vendor')->count(),
-                    'total_buyers' => \App\Models\User::where('role', 'buyer')->count(),
-                    'recent_registrations' => \App\Models\User::latest()->limit(5)->get(),
-                ];
-                break;
-                
-            case 'vendor':
-                // TODO: Add device and sales data when models are created
-                $data = [
-                    'total_devices' => 0, // Will be updated when Device model is created
-                    'devices_sold' => 0,
-                    'pending_reports' => 0,
-                    'monthly_sales' => 0,
-                ];
-                break;
-                
-            case 'buyer':
-                // TODO: Add device and report data when models are created
-                $data = [
-                    'owned_devices' => 0, // Will be updated when Device model is created
-                    'active_reports' => 0,
-                    'resolved_reports' => 0,
-                ];
-                break;
-                
-            case 'manufacturer':
-                // TODO: Add manufacturing data when models are created
-                $data = [
-                    'total_devices' => 0,
-                    'fault_reports' => 0,
-                    'performance_metrics' => [],
-                ];
-                break;
-        }
-        
-        return $data;
-    }
-}
-
-<?php
-
-namespace App\Http\Controllers\Auth;
-
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse; // Add this line
-
-class RegisterController extends Controller
-{
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
-
-    use RegistersUsers;
-
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest');
-    }
-
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator(array $data)
-    {
-        $rules = [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'in:buyer,vendor'],
-            'phone' => ['nullable', 'string', 'max:20'],
-        ];
-
-        // Add company name validation for vendors
-        if (isset($data['role']) && $data['role'] === 'vendor') {
-            $rules['company_name'] = ['required', 'string', 'max:255'];
-        }
-
-        return Validator::make($data, $rules);
-    }
-
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\Models\User
-     */
-    protected function create(array $data)
-    {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'],
-            'phone' => $data['phone'] ?? null,
-            'company_name' => $data['company_name'] ?? null,
-            'status' => 'active',
-        ]);
-    }
-
-    /**
-     * Handle a registration request for the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
-     */
-    public function register(Request $request)
-    {
-        $this->validator($request->all())->validate();
-
-        $user = $this->create($request->all());
-
-        $this->guard()->login($user);
-
-        if ($response = $this->registered($request, $user)) {
-            return $response;
-        }
-
-        return $request->wantsJson()
-                        ? new JsonResponse([], 201)
-                        : redirect($this->redirectPath())->with('success', 'Registration successful! Welcome to BDIC Device Management System.');
-    }
-}
-
-
-namespace App\Http\Middleware;
-
-use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-class CheckRole
-{
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next, ...$roles): Response
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $user = auth()->user();
-        
-        if (!in_array($user->role, $roles)) {
-            abort(403, 'Access denied. You do not have permission to access this resource.');
-        }
-
-        return $next($request);
-    }
-}
 
 
 
-
-<?php
-
-
-
-use App\Http\Controllers\DeviceController;
+-- routes
+se App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceCategoryController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Device;
 
 
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 Route::get('/', function () {
     return view('welcome');
@@ -601,18 +366,6 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-
-
-
-// Routes: web.php (Device Management Routes)
-
-
-
 
 // Device Management Routes
 Route::middleware(['auth'])->group(function () {
@@ -628,38 +381,12 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Dashboard Routes by Role
-    Route::get('vendor/dashboard', function () {
-        return view('dashboards.vendor');
-    })->middleware('role:vendor')->name('vendor.dashboard');
+    Route::get('vendor/dashboard', function () {return view('dashboards.vendor');})->middleware('role:vendor')->name('vendor.dashboard');
     
-    Route::get('buyer/dashboard', function () {
-        return view('dashboards.buyer');
-    })->middleware('role:buyer')->name('buyer.dashboard');
+    Route::get('buyer/dashboard', function () {return view('dashboards.buyer'); })->middleware('role:buyer')->name('buyer.dashboard');
     
-    Route::get('admin/dashboard', function () {
-        return view('dashboards.admin');
-    })->middleware('role:admin')->name('admin.dashboard');
+    Route::get('admin/dashboard', function () {return view('dashboards.admin'); })->middleware('role:admin')->name('admin.dashboard');
     
-    Route::get('manufacturer/dashboard', function () {
-        return view('dashboards.manufacturer');
-    })->middleware('role:manufacturer')->name('manufacturer.dashboard');
+    Route::get('manufacturer/dashboard', function () { return view('dashboards.manufacturer'); })->middleware('role:manufacturer')->name('manufacturer.dashboard');
 });
-
-// API Routes for AJAX calls
-Route::middleware(['auth'])->prefix('api')->group(function () {
-    Route::get('devices/search', [DeviceController::class, 'search'])->name('api.devices.search');
-    Route::get('users/search', function (Request $request) {
-        $users = User::where('email', 'like', '%' . $request->q . '%')
-                    ->orWhere('name', 'like', '%' . $request->q . '%')
-                    ->limit(10)
-                    ->get(['id', 'name', 'email', 'role']);
-        return response()->json($users);
-    })->name('api.users.search');
-    
-    Route::get('devices/{device}/history', function (Device $device) {
-        $transfers = $device->transfers()->with(['fromUser', 'toUser'])->get();
-        return response()->json($transfers);
-    })->name('api.devices.history');
-});
-
 

@@ -64,6 +64,11 @@
 
                             @if(auth()->user()->role == 'admin')
                             <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                                    Admin Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="#">
                                     User Management
                                 </a>
@@ -77,7 +82,7 @@
 
                             @if(in_array(auth()->user()->role, ['vendor', 'admin']))
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link {{ request()->routeIs('devices.index') ? 'active' : '' }}" href="{{ route('devices.index') }}">
                                     Device Management
                                 </a>
                             </li>
@@ -90,14 +95,32 @@
 
                             @if(in_array(auth()->user()->role, ['buyer', 'admin']))
                             <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('buyer.dashboard') ? 'active' : '' }}" href="{{ route('buyer.dashboard') }}">
+                                    Buyer Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="#">
                                     Report Fault
                                 </a>
                             </li>
                             @endif
 
+                            @if(auth()->user()->role == 'manufacturer')
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link {{ request()->routeIs('manufacturer.dashboard') ? 'active' : '' }}" href="{{ route('manufacturer.dashboard') }}">
+                                    Manufacturer Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('device-categories.index') ? 'active' : '' }}" href="{{ route('device-categories.index') }}">
+                                    Device Categories
+                                </a>
+                            </li>
+                            @endif
+
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('profile') ? 'active' : '' }}" href="#">
                                     Profile
                                 </a>
                             </li>
@@ -105,6 +128,7 @@
                         @endauth
                     </div>
                 </nav>
+
 
                 <!-- Main content -->
                 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
