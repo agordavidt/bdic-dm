@@ -1,7 +1,7 @@
 Project Flow
 1. Authentication & Registration
 Registration: Users can register as either a Buyer or Vendor. Vendors must provide a company name; buyers provide personal details.
-Login: All users authenticate via standard Laravel authentication. After login, users are redirected to /home, which then routes them to their role-specific dashboard.
+Login: All users authenticate via standard Laravel authentication. After login, users are redirected to their role-specific dashboard based on their user role (admin, vendor, buyer, manufacturer).
 2. Dashboards
 Role-based Dashboards:
 Admin: Sees total users, vendors, buyers, and devices, with access to user management and analytics.

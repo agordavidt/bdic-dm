@@ -103,4 +103,76 @@ class User extends Authenticatable
     {
         return $query->where('status', 'active');
     }
+
+    /**
+     * Get the products owned by this vendor
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'vendor_id');
+    }
+
+    /**
+     * Get the orders where this user is the buyer
+     */
+    public function buyerOrders()
+    {
+        return $this->hasMany(Order::class, 'buyer_id');
+    }
+
+    /**
+     * Get the orders where this user is the vendor
+     */
+    public function vendorOrders()
+    {
+        return $this->hasMany(Order::class, 'vendor_id');
+    }
+
+    /**
+     * Get the cart items for this user
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    /**
+     * Get the messages sent by this user
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Get the messages received by this user
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    /**
+     * Get unread message count
+     */
+    public function getUnreadMessageCountAttribute()
+    {
+        return $this->receivedMessages()->unread()->count();
+    }
+
+    /**
+     * Get cart total
+     */
+    public function getCartTotalAttribute()
+    {
+        return $this->cartItems()->with('product')->get()->sum('total_price');
+    }
+
+    /**
+     * Get formatted cart total
+     */
+    public function getFormattedCartTotalAttribute()
+    {
+        return '$' . number_format($this->cart_total, 2);
+    }
 }

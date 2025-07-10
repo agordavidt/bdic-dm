@@ -14,6 +14,9 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- FontAwesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
     <!-- Custom CSS -->
     <style>
         .sidebar {
@@ -29,6 +32,13 @@
         .nav-link {
             color: #495057 !important;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-link i {
+            width: 20px;
+            text-align: center;
         }
         .nav-link:hover, .nav-link.active {
             color: #0d6efd !important;
@@ -38,6 +48,11 @@
         .card {
             border: none;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .sidebar .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 
@@ -51,76 +66,73 @@
                 <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                     <div class="position-sticky pt-3">
                         <a class="navbar-brand p-3" href="{{ url('/') }}">
+                            <i class="fas fa-microchip"></i>
                             BDIC Device Management
                         </a>
 
                         @auth
                         <ul class="nav flex-column px-3">
+                            <!-- Common Dashboard Link -->
+                            @php
+                                $role = auth()->user()->role;
+                                $dashboardRoute = match($role) {
+                                    'admin' => 'admin.dashboard',
+                                    'vendor' => 'vendor.dashboard',
+                                    'buyer' => 'buyer.dashboard',
+                                    'manufacturer' => 'manufacturer.dashboard',
+                                    default => null
+                                };
+                            @endphp
+                            @if($dashboardRoute)
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                                <a class="nav-link {{ request()->routeIs($dashboardRoute) ? 'active' : '' }}" href="{{ route($dashboardRoute) }}">
+                                    <i class="fas fa-tachometer-alt"></i>
                                     Dashboard
                                 </a>
                             </li>
+                            @endif
 
+                            <!-- E-Commerce Navigation Links -->
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
+                                    <i class="fas fa-store"></i>
+                                    Products
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('cart.*') ? 'active' : '' }}" href="{{ route('cart.index') }}">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Cart
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
+                                    <i class="fas fa-box"></i>
+                                    Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}" href="{{ route('messages.index') }}">
+                                    <i class="fas fa-envelope"></i>
+                                    Messages
+                                </a>
+                            </li>
+
+                            <!-- Role-based Navigation -->
                             @if(auth()->user()->role == 'admin')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                                    Admin Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    User Management
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    Analytics
-                                </a>
-                            </li>
+                                @include('partials.sidebars.admin')
+                            @elseif(auth()->user()->role == 'vendor')
+                                @include('partials.sidebars.vendor')
+                            @elseif(auth()->user()->role == 'buyer')
+                                @include('partials.sidebars.buyer')
+                            @elseif(auth()->user()->role == 'manufacturer')
+                                @include('partials.sidebars.manufacturer')
                             @endif
 
-                            @if(in_array(auth()->user()->role, ['vendor', 'admin']))
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('devices.index') ? 'active' : '' }}" href="{{ route('devices.index') }}">
-                                    Device Management
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    Sales
-                                </a>
-                            </li>
-                            @endif
-
-                            @if(in_array(auth()->user()->role, ['buyer', 'admin']))
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('buyer.dashboard') ? 'active' : '' }}" href="{{ route('buyer.dashboard') }}">
-                                    Buyer Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    Report Fault
-                                </a>
-                            </li>
-                            @endif
-
-                            @if(auth()->user()->role == 'manufacturer')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('manufacturer.dashboard') ? 'active' : '' }}" href="{{ route('manufacturer.dashboard') }}">
-                                    Manufacturer Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('device-categories.index') ? 'active' : '' }}" href="{{ route('device-categories.index') }}">
-                                    Device Categories
-                                </a>
-                            </li>
-                            @endif
-
+                            <!-- Common Profile Link -->
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('profile') ? 'active' : '' }}" href="#">
+                                    <i class="fas fa-user"></i>
                                     Profile
                                 </a>
                             </li>
@@ -128,7 +140,6 @@
                         @endauth
                     </div>
                 </nav>
-
 
                 <!-- Main content -->
                 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
@@ -140,15 +151,27 @@
                         <div class="btn-toolbar mb-2 mb-md-0">
                             <div class="dropdown">
                                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle me-2"></i>
                                     {{ Auth::user()->name }}
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Profile</a></li>
-                                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-user me-2"></i>
+                                            Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-cog me-2"></i>
+                                            Settings
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item" href="{{ route('logout') }}"
                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            <i class="fas fa-sign-out-alt me-2"></i>
                                             Logout
                                         </a>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -165,6 +188,7 @@
                     <div class="content">
                         @if(session('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
                                 {{ session('success') }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
@@ -172,6 +196,7 @@
 
                         @if(session('error'))
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
                                 {{ session('error') }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>

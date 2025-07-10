@@ -237,7 +237,27 @@
             <div class="nav-links">
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/home') }}">Dashboard</a>
+                        @php
+                            $user = auth()->user();
+                            $dashboardRoute = '';
+                            switch ($user->role) {
+                                case 'admin':
+                                    $dashboardRoute = route('admin.dashboard');
+                                    break;
+                                case 'vendor':
+                                    $dashboardRoute = route('vendor.dashboard');
+                                    break;
+                                case 'buyer':
+                                    $dashboardRoute = route('buyer.dashboard');
+                                    break;
+                                case 'manufacturer':
+                                    $dashboardRoute = route('manufacturer.dashboard');
+                                    break;
+                                default:
+                                    $dashboardRoute = '/';
+                            }
+                        @endphp
+                        <a href="{{ $dashboardRoute }}">Dashboard</a>
                     @else
                         <a href="{{ route('login') }}">Log in</a>
                         @if (Route::has('register'))
@@ -256,7 +276,27 @@
             </p>
             <div class="cta-buttons">
                 @auth
-                    <a href="{{ url('/home') }}" class="btn btn-primary">Go to Dashboard</a>
+                    @php
+                        $user = auth()->user();
+                        $dashboardRoute = '';
+                        switch ($user->role) {
+                            case 'admin':
+                                $dashboardRoute = route('admin.dashboard');
+                                break;
+                            case 'vendor':
+                                $dashboardRoute = route('vendor.dashboard');
+                                break;
+                            case 'buyer':
+                                $dashboardRoute = route('buyer.dashboard');
+                                break;
+                            case 'manufacturer':
+                                $dashboardRoute = route('manufacturer.dashboard');
+                                break;
+                            default:
+                                $dashboardRoute = '/';
+                        }
+                    @endphp
+                    <a href="{{ $dashboardRoute }}" class="btn btn-primary">Go to Dashboard</a>
                 @else
                     <a href="{{ route('register') }}" class="btn btn-primary">Get Started</a>
                     <a href="{{ route('login') }}" class="btn btn-secondary">Already a Member?</a>

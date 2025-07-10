@@ -25,9 +25,19 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $dashboardData = $this->getDashboardData($user);
-        
-        return view('home', compact('user', 'dashboardData'));
+        // Redirect to the appropriate dashboard
+        switch ($user->role) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'vendor':
+                return redirect()->route('vendor.dashboard');
+            case 'buyer':
+                return redirect()->route('buyer.dashboard');
+            case 'manufacturer':
+                return redirect()->route('manufacturer.dashboard');
+            default:
+                abort(403);
+        }
     }
     
     /**

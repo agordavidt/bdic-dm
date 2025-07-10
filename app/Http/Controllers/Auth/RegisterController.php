@@ -28,9 +28,24 @@ class RegisterController extends Controller
     /**
      * Where to redirect users after registration.
      *
-     * @var string
+     * @return string
      */
-    protected $redirectTo = '/home';
+    protected function redirectTo()
+    {
+        $user = auth()->user();
+        switch ($user->role) {
+            case 'admin':
+                return route('admin.dashboard');
+            case 'vendor':
+                return route('vendor.dashboard');
+            case 'buyer':
+                return route('buyer.dashboard');
+            case 'manufacturer':
+                return route('manufacturer.dashboard');
+            default:
+                return '/';
+        }
+    }
 
     /**
      * Create a new controller instance.

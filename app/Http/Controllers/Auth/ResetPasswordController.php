@@ -21,9 +21,22 @@ class ResetPasswordController extends Controller
     use ResetsPasswords;
 
     /**
-     * Where to redirect users after resetting their password.
-     *
-     * @var string
+     * Get the post-reset redirect path based on user role.
      */
-    protected $redirectTo = '/home';
+    protected function redirectTo()
+    {
+        $user = auth()->user();
+        switch ($user->role) {
+            case 'admin':
+                return route('admin.dashboard');
+            case 'vendor':
+                return route('vendor.dashboard');
+            case 'buyer':
+                return route('buyer.dashboard');
+            case 'manufacturer':
+                return route('manufacturer.dashboard');
+            default:
+                return '/';
+        }
+    }
 }
