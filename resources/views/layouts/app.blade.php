@@ -90,33 +90,7 @@
                                     Dashboard
                                 </a>
                             </li>
-                            @endif
-
-                            <!-- E-Commerce Navigation Links -->
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
-                                    <i class="fas fa-store"></i>
-                                    Products
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('cart.*') ? 'active' : '' }}" href="{{ route('cart.index') }}">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    Cart
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
-                                    <i class="fas fa-box"></i>
-                                    Orders
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('messages.*') ? 'active' : '' }}" href="{{ route('messages.index') }}">
-                                    <i class="fas fa-envelope"></i>
-                                    Messages
-                                </a>
-                            </li>
+                            @endif                        
 
                             <!-- Role-based Navigation -->
                             @if(auth()->user()->role == 'admin')

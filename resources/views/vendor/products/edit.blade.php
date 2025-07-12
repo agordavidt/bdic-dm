@@ -1,19 +1,23 @@
 @extends('layouts.app')
 
+@section('title', 'Edit Product')
+@section('page-title', 'Edit Product')
+
 @section('content')
 <div class="container-fluid px-4 py-4">
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h2 text-dark">Add New Product</h1>
+                <h1 class="h2 text-dark">Edit Product</h1>
                 <a href="{{ route('vendor.products.index') }}" class="btn btn-link text-primary">
                     <i class="fas fa-arrow-left me-2"></i>Back to Products
                 </a>
             </div>
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form action="{{ route('vendor.products.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('vendor.products.update', $product) }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        @method('PATCH')
 
                         <div class="row mb-4">
                             <div class="col-md-12">
@@ -21,21 +25,21 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="name" class="form-label">Product Name *</label>
-                                <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" required>
+                                <input type="text" class="form-control" name="name" id="name" value="{{ old('name', $product->name) }}" required>
                                 @error('name')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="sku" class="form-label">SKU *</label>
-                                <input type="text" class="form-control" name="sku" id="sku" value="{{ old('sku') }}" required>
+                                <input type="text" class="form-control" name="sku" id="sku" value="{{ old('sku', $product->sku) }}" required>
                                 @error('sku')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="description" class="form-label">Description *</label>
-                                <textarea class="form-control" name="description" id="description" rows="4" required>{{ old('description') }}</textarea>
+                                <textarea class="form-control" name="description" id="description" rows="4" required>{{ old('description', $product->description) }}</textarea>
                                 @error('description')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
@@ -50,7 +54,7 @@
                                 <label for="price" class="form-label">Price *</label>
                                 <div class="input-group">
                                 <span class="input-group-text">₦</span>
-                                    <input type="number" class="form-control" name="price" id="price" value="{{ old('price') }}" step="0.01" min="0" required>
+                                    <input type="number" class="form-control" name="price" id="price" value="{{ old('price', $product->price) }}" step="0.01" min="0" required>
                                 </div>
                                 @error('price')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
@@ -58,7 +62,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="stock_quantity" class="form-label">Stock Quantity *</label>
-                                <input type="number" class="form-control" name="stock_quantity" id="stock_quantity" value="{{ old('stock_quantity', 0) }}" min="0" required>
+                                <input type="number" class="form-control" name="stock_quantity" id="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" min="0" required>
                                 @error('stock_quantity')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
@@ -74,7 +78,7 @@
                                 <select class="form-select" name="category_id" id="category_id" required>
                                     <option value="">Select Category</option>
                                     @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
@@ -85,7 +89,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="featured" id="featured" value="1" {{ old('featured') ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" name="featured" id="featured" value="1" {{ old('featured', $product->featured) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="featured">
                                         Mark as featured
                                     </label>
@@ -104,6 +108,19 @@
                                 @error('images.*')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
+                                <div id="existing-image-preview" class="mt-3 d-flex flex-wrap gap-2">
+                                    @if(is_array($product->images))
+                                        @foreach($product->images as $idx => $img)
+                                            <div class="position-relative me-2 mb-2">
+                                                <img src="{{ $img }}" class="rounded border" style="width:100px;height:100px;object-fit:cover;">
+                                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-existing-image" data-index="{{ $idx }}" style="z-index:2;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <input type="hidden" name="existing_images[]" value="{{ $img }}">
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
                                 <div id="image-preview" class="mt-3 d-flex flex-wrap gap-2"></div>
                             </div>
                         </div>
@@ -114,14 +131,32 @@
                                 <p class="text-muted">Add product specifications (optional)</p>
                             </div>
                             <div class="col-md-12" id="specifications-container">
-                                <div class="row mb-2 specification-row">
-                                    <div class="col-md-5">
-                                        <input type="text" class="form-control" name="specifications[key][]" placeholder="Specification name">
+                                @if(is_array($product->specifications))
+                                    @foreach($product->specifications as $key => $value)
+                                        <div class="row mb-2 specification-row">
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control" name="specifications[key][]" placeholder="Specification name" value="{{ $key }}">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input type="text" class="form-control" name="specifications[value][]" placeholder="Specification value" value="{{ $value }}">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-danger remove-specification">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="row mb-2 specification-row">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="specifications[key][]" placeholder="Specification name">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="specifications[value][]" placeholder="Specification value">
+                                        </div>
                                     </div>
-                                    <div class="col-md-5">
-                                        <input type="text" class="form-control" name="specifications[value][]" placeholder="Specification value">
-                                    </div>
-                                </div>
+                                @endif
                             </div>
                             <div class="col-md-12">
                                 <button type="button" id="add-specification" class="btn btn-link text-primary">
@@ -135,7 +170,7 @@
                                 <i class="fas fa-ban me-2"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Create Product
+                                <i class="fas fa-save me-2"></i>Update Product
                             </button>
                         </div>
                     </form>
@@ -148,29 +183,19 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Image preview functionality
+    // Image preview for new uploads
     const imagesInput = document.getElementById('images');
     const previewContainer = document.getElementById('image-preview');
-    
-    // Store previously displayed images
-    let currentPreviews = [];
-    
     imagesInput.addEventListener('change', function() {
+        previewContainer.innerHTML = '';
         const files = Array.from(this.files);
-        
         if (files.length > 6) {
             alert('You can only upload up to 6 images.');
             imagesInput.value = '';
             return;
         }
-        
-        // Clear only if we have new files to avoid flickering
-        previewContainer.innerHTML = '';
-        currentPreviews = [];
-        
         files.forEach(file => {
             if (!file.type.startsWith('image/')) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = document.createElement('img');
@@ -181,18 +206,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 img.style.objectFit = 'cover';
                 img.style.marginRight = '8px';
                 previewContainer.appendChild(img);
-                
-                // Store reference to the preview
-                currentPreviews.push({
-                    file: file,
-                    element: img
-                });
             };
             reader.readAsDataURL(file);
         });
     });
 
-    // Rest of your existing code for specifications...
+    // Remove existing image
+    document.querySelectorAll('.remove-existing-image').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            this.closest('.position-relative').remove();
+        });
+    });
+
+    // Specification functionality
     document.getElementById('add-specification').addEventListener('click', function() {
         const container = document.getElementById('specifications-container');
         const newRow = document.createElement('div');
@@ -219,5 +245,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
-
-@endsection
+@endsection 

@@ -68,6 +68,32 @@ class ProductController extends Controller
     }
 
     /**
+     * Display a listing of the vendor's products (vendor dashboard)
+     */
+    public function vendorIndex(Request $request)
+    {
+        $query = Product::where('vendor_id', auth()->id())->with('category');
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search by name or SKU
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->latest()->paginate(20);
+
+        return view('vendor.products.index', compact('products'));
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -93,6 +119,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:device_categories,id',
             'sku' => 'required|string|unique:products,sku',
             'specifications' => 'nullable|array',
+            'images' => 'nullable|array|max:6',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'featured' => 'boolean',
         ]);
@@ -112,7 +139,7 @@ class ProductController extends Controller
 
         Product::create($validated);
 
-        return redirect()->route('products.index')
+        return redirect()->route('vendor.products.index')
             ->with('success', 'Product created successfully.');
     }
 
@@ -176,7 +203,7 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return redirect()->route('products.index')
+        return redirect()->route('vendor.products.index')
             ->with('success', 'Product updated successfully.');
     }
 
@@ -209,4 +236,6 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
+    
 } 

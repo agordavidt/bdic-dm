@@ -42,6 +42,29 @@ class OrderController extends Controller
     }
 
     /**
+     * Display a listing of the vendor's orders (vendor dashboard)
+     */
+    public function vendorIndex(Request $request)
+    {
+        $query = Order::with(['buyer', 'orderItems.product'])
+            ->where('vendor_id', auth()->id());
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by payment status
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        $orders = $query->latest()->paginate(20);
+
+        return view('vendor.orders.index', compact('orders'));
+    }
+
+    /**
      * Show checkout form
      */
     public function checkout()

@@ -1,9 +1,9 @@
-<li class="nav-item">
+<!-- <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
         <i class="fas fa-crown"></i>
         Admin Dashboard
     </a>
-</li>
+</li> -->
 
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="#">

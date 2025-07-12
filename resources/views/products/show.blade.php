@@ -95,11 +95,11 @@
 
                     @if(auth()->user()->isVendor() && auth()->user()->id === $product->vendor_id)
                         <div class="flex gap-2 mt-4">
-                            <a href="{{ route('products.edit', $product) }}" 
+                            <a href="{{ route('vendor.products.edit', $product) }}" 
                                class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-4 rounded">
                                 Edit Product
                             </a>
-                            <form action="{{ route('products.destroy', $product) }}" method="POST" class="flex-1">
+                            <form action="{{ route('vendor.products.destroy', $product) }}" method="POST" class="flex-1">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" onclick="return confirm('Are you sure you want to delete this product?')"
@@ -133,7 +133,7 @@
                         <div class="p-4">
                             <h3 class="font-semibold text-gray-900 mb-2">{{ $relatedProduct->name }}</h3>
                             <p class="text-lg font-bold text-blue-600 mb-2">{{ $relatedProduct->formatted_price }}</p>
-                            <a href="{{ route('products.show', $relatedProduct) }}" 
+                            <a href="{{ route('vendor.products.show', $relatedProduct) }}" 
                                class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded text-sm">
                                 View Details
                             </a>
