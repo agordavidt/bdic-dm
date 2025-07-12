@@ -17,7 +17,7 @@ class CartController extends Controller
         $cartItems = Auth::user()->cartItems()->with('product')->get();
         $total = $cartItems->sum('total_price');
 
-        return view('cart.index', compact('cartItems', 'total'));
+        return view('buyer.cart.index', compact('cartItems', 'total'));
     }
 
     /**

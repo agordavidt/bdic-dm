@@ -38,7 +38,7 @@ class OrderController extends Controller
 
         $orders = $query->latest()->paginate(15);
 
-        return view('orders.index', compact('orders'));
+        return view('buyer.orders.index', compact('orders'));
     }
 
     /**
@@ -72,18 +72,18 @@ class OrderController extends Controller
         $cartItems = Auth::user()->cartItems()->with('product')->get();
         
         if ($cartItems->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('buyer.cart.index')->with('error', 'Your cart is empty.');
         }
 
         // Validate cart items
         foreach ($cartItems as $item) {
             if (!$item->isProductAvailable()) {
-                return redirect()->route('cart.index')
+                return redirect()->route('buyer.cart.index')
                     ->with('error', "Product '{$item->product->name}' is no longer available.");
             }
 
             if (!$item->isQuantityAvailable()) {
-                return redirect()->route('cart.index')
+                return redirect()->route('buyer.cart.index')
                     ->with('error', "Insufficient stock for '{$item->product->name}'.");
             }
         }
@@ -93,7 +93,7 @@ class OrderController extends Controller
         $tax = $total * 0.1; // 10% tax rate
         $grandTotal = $total + $shipping + $tax;
 
-        return view('orders.checkout', compact('cartItems', 'total', 'shipping', 'tax', 'grandTotal'));
+        return view('buyer.orders.checkout', compact('cartItems', 'total', 'shipping', 'tax', 'grandTotal'));
     }
 
     /**
@@ -111,7 +111,7 @@ class OrderController extends Controller
         $cartItems = Auth::user()->cartItems()->with('product')->get();
         
         if ($cartItems->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('buyer.cart.index')->with('error', 'Your cart is empty.');
         }
 
         // Group cart items by vendor
@@ -178,7 +178,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        return view('orders.show', compact('order'));
+        return view('buyer.orders.show', compact('order'));
     }
 
     /**

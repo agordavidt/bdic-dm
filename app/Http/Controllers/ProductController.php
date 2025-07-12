@@ -64,7 +64,7 @@ class ProductController extends Controller
         $products = $query->latest()->paginate(12);
         $categories = DeviceCategory::all();
 
-        return view('products.index', compact('products', 'categories'));
+        return view('buyer.products.index', compact('products', 'categories'));
     }
 
     /**
@@ -157,7 +157,7 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
-        return view('products.show', compact('product', 'relatedProducts'));
+        return view('buyer.products.show', compact('product', 'relatedProducts'));
     }
 
     /**

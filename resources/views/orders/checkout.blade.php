@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
-        <a href="{{ route('cart.index') }}" class="text-blue-600 hover:text-blue-800">← Back to Cart</a>
+        <a href="{{ route('buyer.cart.index') }}" class="text-blue-600 hover:text-blue-800">← Back to Cart</a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
