@@ -35,6 +35,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('vendor/dashboard', [App\Http\Controllers\VendorDashboardController::class, 'index'])->middleware('role:vendor')->name('vendor.dashboard');
     Route::get('buyer/dashboard', [App\Http\Controllers\BuyerDashboardController::class, 'index'])->middleware('role:buyer')->name('buyer.dashboard');
     Route::get('manufacturer/dashboard', [App\Http\Controllers\ManufacturerDashboardController::class, 'index'])->middleware('role:manufacturer')->name('manufacturer.dashboard');
+    
+    // Admin E-commerce Routes
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        // Product Management
+        Route::get('products', [App\Http\Controllers\Admin\ProductController::class, 'index'])->name('products.index');
+        Route::get('products/{product}', [App\Http\Controllers\Admin\ProductController::class, 'show'])->name('products.show');
+        Route::patch('products/{product}/toggle-status', [App\Http\Controllers\Admin\ProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        
+        // Order Management (admin only)
+        Route::get('orders', [App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
+        Route::patch('orders/{order}/status', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.update-status');
+        
+        // Analytics
+        Route::get('analytics', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
+    });
 });
 
 // Enhanced E-Commerce Module Routes
@@ -107,11 +123,11 @@ Route::middleware(['auth'])->group(function () {
         // Checkout and Order Routes - FR_ECO_010, FR_ECO_011, FR_ECO_012, FR_ECO_015
         // Views: resources/views/buyer/orders/
         Route::prefix('buyer/orders')->name('buyer.orders.')->group(function () {
-            Route::get('/', [OrderController::class, 'index'])->name('index');
-            Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-            Route::post('/', [OrderController::class, 'store'])->name('store');
-            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
-            Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+            Route::get('/', [App\Http\Controllers\OrderController::class, 'index'])->name('index');
+            Route::get('/checkout', [App\Http\Controllers\OrderController::class, 'checkout'])->name('checkout');
+            Route::post('/', [App\Http\Controllers\OrderController::class, 'store'])->name('store');
+            Route::get('/{order}', [App\Http\Controllers\OrderController::class, 'show'])->name('show');
+            Route::post('/{order}/cancel', [App\Http\Controllers\OrderController::class, 'cancel'])->name('cancel');
         });
         
         // Buyer Product Browsing - specific buyer views

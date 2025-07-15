@@ -13,7 +13,21 @@
 </li>
 
 <li class="nav-item">
-    <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}" href="#">
+    <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">
+        <i class="fas fa-box"></i>
+        Product Catalog
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">
+        <i class="fas fa-shopping-cart"></i>
+        Order Management
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}" href="{{ route('admin.analytics.index') }}">
         <i class="fas fa-chart-line"></i>
         Analytics
     </a>
@@ -25,14 +39,6 @@
         Device Management
     </a>
 </li>
-
-<li class="nav-item">
-    <a class="nav-link {{ request()->routeIs('admin.sales.*') ? 'active' : '' }}" href="#">
-        <i class="fas fa-shopping-cart"></i>
-        Sales
-    </a>
-</li>
-
 
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('admin.faults.*') ? 'active' : '' }}" href="#">

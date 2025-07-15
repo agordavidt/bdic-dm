@@ -20,4 +20,9 @@ class DeviceCategory extends Model
     {
         return $this->hasMany(Device::class, 'category_id');
     }
+
+    public function products()
+    {
+        return $this->hasMany(\App\Models\Product::class, 'category_id');
+    }
 }

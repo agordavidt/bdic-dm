@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>My Products</h2>
+    <h2></h2>
     <a href="{{ route('vendor.products.create') }}" class="btn btn-primary">Add New Product</a>
 </div>
 
