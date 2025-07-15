@@ -132,6 +132,32 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// Vendor Device Management
+Route::middleware(['role:vendor'])->prefix('vendor')->name('vendor.')->group(function () {
+    Route::get('devices', [\App\Http\Controllers\DeviceController::class, 'index'])->name('devices.index');
+    Route::get('devices/create', [\App\Http\Controllers\DeviceController::class, 'create'])->name('devices.create');
+    Route::post('devices', [\App\Http\Controllers\DeviceController::class, 'store'])->name('devices.store');
+    Route::get('devices/{device}', [\App\Http\Controllers\DeviceController::class, 'show'])->name('devices.show');
+    Route::get('devices/{device}/edit', [\App\Http\Controllers\DeviceController::class, 'edit'])->name('devices.edit');
+    Route::patch('devices/{device}', [\App\Http\Controllers\DeviceController::class, 'update'])->name('devices.update');
+    Route::delete('devices/{device}', [\App\Http\Controllers\DeviceController::class, 'destroy'])->name('devices.destroy');
+});
+
+// Buyer Fault Reports
+Route::prefix('buyer/fault-reports')->name('buyer.fault_reports.')->middleware(['role:buyer'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Buyer\FaultReportController::class, 'index'])->name('index');
+    Route::get('/create/{device}', [\App\Http\Controllers\Buyer\FaultReportController::class, 'create'])->name('create');
+    Route::post('/store/{device}', [\App\Http\Controllers\Buyer\FaultReportController::class, 'store'])->name('store');
+    Route::get('/{faultReport}', [\App\Http\Controllers\Buyer\FaultReportController::class, 'show'])->name('show');
+});
+
+// Vendor Fault Reports
+Route::prefix('vendor/fault-reports')->name('vendor.fault_reports.')->middleware(['role:vendor'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Vendor\FaultReportController::class, 'index'])->name('index');
+    Route::get('/{faultReport}', [\App\Http\Controllers\Vendor\FaultReportController::class, 'show'])->name('show');
+    Route::patch('/{faultReport}/resolve', [\App\Http\Controllers\Vendor\FaultReportController::class, 'resolve'])->name('resolve');
+});
+
 // API Routes for AJAX calls
 Route::middleware(['auth'])->prefix('api')->group(function () {
     Route::get('devices/search', [DeviceController::class, 'search'])->name('api.devices.search');

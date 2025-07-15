@@ -4,28 +4,35 @@
         Dashboard
     </a>
 </li> -->
+
 <li class="nav-item">
-    <a class="nav-link {{ request()->routeIs('vendor.products.*') ? 'active' : '' }}" href="{{ route('vendor.products.index') }}">
-        <i class="fas fa-box"></i>
-        My Products
+    <a class="nav-link {{ request()->routeIs('vendor.devices.*') ? 'active' : '' }}" href="{{ route('vendor.devices.index') }}">
+        <i class="fas fa-mobile-alt"></i>
+        My Devices
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link {{ request()->routeIs('vendor.inventory.*') ? 'active' : '' }}" href="{{ route('vendor.inventory.index') }}">
-        <i class="fas fa-warehouse"></i>
-        Inventory
+    <a class="nav-link {{ request()->routeIs('vendor.fault_reports.*') ? 'active' : '' }}" href="{{ route('vendor.fault_reports.index') }}">
+        <i class="fas fa-exclamation-triangle"></i>
+        Fault Reports
     </a>
 </li>
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('vendor.orders.*') ? 'active' : '' }}" href="{{ route('vendor.orders.index') }}">
-        <i class="fas fa-shopping-cart"></i>
+        <i class="fas fa-box"></i>
         Orders
     </a>
 </li>
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('vendor.analytics.*') ? 'active' : '' }}" href="{{ route('vendor.analytics.index') }}">
-        <i class="fas fa-chart-line"></i>
+        <i class="fas fa-chart-bar"></i>
         Analytics
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('vendor.products.*') ? 'active' : '' }}" href="{{ route('vendor.products.index') }}">
+        <i class="fas fa-th-list"></i>
+        Products
     </a>
 </li>
 <li class="nav-item">
