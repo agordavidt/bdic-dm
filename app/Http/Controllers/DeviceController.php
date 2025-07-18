@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Mail\DeviceRegisteredMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class DeviceController extends Controller
 {
@@ -89,19 +92,11 @@ class DeviceController extends Controller
             'category_id' => 'required|exists:device_categories,id',
             'price' => 'nullable|numeric|min:0',
             'warranty_expiry' => 'nullable|date|after:today',
-            
             // Buyer information
-            'buyer_full_name' => 'nullable|string|max:255',
-            'buyer_phone' => 'nullable|string|max:20',
-            'buyer_address' => 'nullable|string',
-            'buyer_city' => 'nullable|string|max:255',
-            'buyer_state' => 'nullable|string|max:255',
-            'buyer_country' => 'nullable|string|max:255',
-            'buyer_id_type' => 'nullable|string|max:50',
-            'buyer_id_number' => 'nullable|string|max:50',
-            'buyer_category' => 'nullable|in:individual,institution,corporate',
-            'institution_name' => 'nullable|string|max:255',
-            'tax_id' => 'nullable|string|max:50',
+            'buyer_email' => 'required|email',
+            'buyer_name' => 'required|string|max:255',
+            'buyer_phone' => 'required|string|max:20',
+            'buyer_address' => 'required|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -116,14 +111,18 @@ class DeviceController extends Controller
                 'vendor_id' => Auth::id(),
                 'price' => $validated['price'],
                 'warranty_expiry' => $validated['warranty_expiry'],
-                'buyer_category' => $validated['buyer_category'],
+                'buyer_name' => $validated['buyer_name'],
+                'buyer_email' => $validated['buyer_email'],
+                'buyer_phone' => $validated['buyer_phone'],
+                'buyer_address' => $validated['buyer_address'],
                 'purchase_date' => now(),
             ]);
 
-            // Create buyer profile if buyer information is provided
-            if ($request->filled('buyer_full_name')) {
-                $buyerProfile = $this->createOrUpdateBuyerProfile($validated);
-                $device->update(['buyer_id' => $buyerProfile->user_id]);
+            // TODO: Send email notification to buyer_email about device registration
+            try {
+                Mail::to($device->buyer_email)->send(new DeviceRegisteredMail($device, $device->buyer_name));
+            } catch (\Exception $e) {
+                Log::error('Failed to send device registration email: ' . $e->getMessage());
             }
 
             DB::commit();
@@ -247,17 +246,18 @@ class DeviceController extends Controller
      */
     private function createOrUpdateBuyerProfile(array $data)
     {
-        // Find or create user based on email (simplified for this example)
-        // In production, you might want a more sophisticated user matching
+        // Require buyer_email
+        if (empty($data['buyer_email'])) {
+            throw new \InvalidArgumentException('Buyer email is required.');
+        }
         $user = User::firstOrCreate(
-            ['email' => $data['buyer_email'] ?? 'buyer@' . time() . '.com'],
+            ['email' => $data['buyer_email']],
             [
                 'name' => $data['buyer_full_name'],
                 'role' => 'buyer',
                 'password' => bcrypt('temporary123'), // Should be changed on first login
             ]
         );
-
         return BuyerProfile::updateOrCreate(
             ['user_id' => $user->id],
             [

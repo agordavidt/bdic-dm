@@ -1,0 +1,141 @@
+-- migrations
+ public function up(): void
+    {
+        Schema::create('device_categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    Schema::create('devices', function (Blueprint $table) {
+            $table->id();
+            $table->string('unique_identifier')->unique(); // PG or serial number
+            $table->string('device_type');
+            $table->string('model');
+            $table->string('brand')->nullable();
+            $table->text('specifications')->nullable();
+            $table->foreignId('category_id')->constrained('device_categories');
+            $table->foreignId('vendor_id')->constrained('users'); // Vendor who registered
+            $table->foreignId('buyer_id')->nullable()->constrained('users'); // Current owner
+            $table->string('buyer_name')->nullable(); // Vendor-provided buyer name
+            $table->string('buyer_email')->nullable(); // Vendor-provided buyer email
+            $table->string('buyer_phone')->nullable(); // Vendor-provided buyer phone
+            $table->enum('buyer_category', ['individual', 'institution', 'corporate'])->nullable();
+            $table->enum('status', ['active', 'needs_attention', 'replacement_needed', 'stolen'])->default('active');
+            $table->decimal('price', 10, 2)->nullable();
+            $table->date('purchase_date')->nullable();
+            $table->date('warranty_expiry')->nullable();
+            $table->json('metadata')->nullable(); // Additional flexible data
+            $table->timestamps();
+            
+            $table->index(['vendor_id', 'status']);
+            $table->index(['buyer_id', 'status']);
+            $table->index('unique_identifier');
+        });
+
+         public function up(): void
+    {
+        Schema::table('devices', function (Blueprint $table) {
+            //
+        });
+    }
+
+
+    view:
+    @extends('layouts.app')
+
+@section('title', 'Register Device')
+
+@section('content')
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header ">
+            <h4 class="card-title mb-0">Register Device</h4>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('devices.store') }}" method="POST" id="device-registration-form">
+                @csrf
+                <div class="row">
+                    <!-- Device Information -->
+                    <div class="col-md-6">
+                        <h5 class="mb-3 ">Device Information</h5>
+                        <div class="mb-3">
+                            <label for="unique_identifier" class="form-label">Unique Identifier</label>
+                            <input type="text" class="form-control" id="unique_identifier" name="unique_identifier" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="device_type" class="form-label">Device Type</label>
+                            <input type="text" class="form-control" id="device_type" name="device_type" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model" name="model" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <input type="text" class="form-control" id="brand" name="brand">
+                        </div>
+                        <div class="mb-3">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="warranty_expiry" class="form-label">Warranty Expiry</label>
+                            <input type="date" class="form-control" id="warranty_expiry" name="warranty_expiry">
+                        </div>
+                    </div>
+
+                    <!-- Buyer Information -->
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Buyer Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="buyer_email" class="form-label">Buyer Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="buyer_email" name="buyer_email" required placeholder="e.g. buyer@email.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="buyer_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="buyer_name" name="buyer_name" required placeholder="e.g. John Doe">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="buyer_phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="buyer_phone" name="buyer_phone" required placeholder="e.g. 08012345678">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="buyer_address" class="form-label">Address <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="buyer_address" name="buyer_address" required placeholder="e.g. 123 Main St, City, State">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                       </i>Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+// (Removed buyer lookup/prefill JS)
+</script>
+@endpush
+@endsection

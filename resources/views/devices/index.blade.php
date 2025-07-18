@@ -11,13 +11,6 @@
                 <h5 class="card-title mb-0">Devices</h5>
             </div>
             <div class="card-body">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         {{ $errors->first() }}
@@ -86,8 +79,15 @@
                                     <td>{{ $device->category->name }}</td>
                                     <td>{{ ucfirst($device->status) }}</td>
                                     <td>
-                                        <a href="{{ route('devices.show', $device) }}" class="btn btn-sm btn-info">View</a>
-                                        <a href="{{ route('devices.edit', $device) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{{ route('devices.show', $device) }}" class="btn btn-sm btn-info me-1" title="View Device">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('devices.edit', $device) }}" class="btn btn-sm btn-warning me-1" title="Edit Device">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ route('devices.transfer', $device) }}" class="btn btn-sm btn-secondary" title="Transfer Device">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach

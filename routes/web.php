@@ -148,6 +148,11 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// Buyer routes
+Route::middleware(['auth', 'role:buyer'])->prefix('buyer')->name('buyer.')->group(function () {
+    Route::get('devices', [App\Http\Controllers\Buyer\DeviceController::class, 'index'])->name('devices.index');
+});
+
 // Vendor Device Management
 Route::middleware(['role:vendor'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('devices', [\App\Http\Controllers\DeviceController::class, 'index'])->name('devices.index');
@@ -203,4 +208,7 @@ Route::middleware(['auth'])->prefix('api')->group(function () {
         Route::get('cart/total', [CartController::class, 'total'])->name('api.cart.total');
         Route::get('products/search', [ProductController::class, 'search'])->name('api.products.search');
     });
+
+    // API route for buyer info lookup (for device registration autofill)
+    Route::get('/api/buyer-info', [App\Http\Controllers\Api\BuyerInfoController::class, 'show'])->name('api.buyer-info');
 });

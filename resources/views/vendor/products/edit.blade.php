@@ -167,10 +167,10 @@
 
                         <div class="d-flex justify-content-end pt-4 border-top mt-4">
                             <a href="{{ route('vendor.products.index') }}" class="btn btn-secondary me-2">
-                                <i class="fas fa-ban me-2"></i>Cancel
+                               Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Update Product
+                               Update Product
                             </button>
                         </div>
                     </form>

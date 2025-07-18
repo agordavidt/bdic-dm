@@ -22,6 +22,12 @@
         My Orders
     </a>
 </li>
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.devices.index') ? 'active' : '' }}" href="{{ route('buyer.devices.index') }}">
+        <i class="fas fa-exclamation-triangle"></i>
+        Report Fault
+    </a>
+</li>
 <!-- <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.profile.*') ? 'active' : '' }}" href="{{ route('buyer.profile.show') }}">
         <i class="fas fa-user"></i>

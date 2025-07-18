@@ -23,7 +23,10 @@ class Device extends Model
         'category_id',
         'vendor_id',
         'buyer_id',
-        'buyer_category',
+        'buyer_name',
+        'buyer_email',
+        'buyer_phone',
+        'buyer_address', 
         'status',
         'price',
         'purchase_date',
@@ -88,6 +91,11 @@ class Device extends Model
     public function scopeByBuyerCategory($query, $category)
     {
         return $query->where('buyer_category', $category);
+    }
+
+    public function scopeByBuyerEmail($query, $email)
+    {
+        return $query->whereRaw('LOWER(buyer_email) = ?', [strtolower($email)]);
     }
 
     // Helper methods

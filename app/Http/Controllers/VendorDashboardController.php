@@ -17,12 +17,17 @@ class VendorDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $totalDevices = Device::where('vendor_id', $user->id)->count();
-        $devicesSold = Device::where('vendor_id', $user->id)->whereNotNull('buyer_id')->count();
-        $pendingReports = 0; // Placeholder, update with actual logic if available
-        $monthlySales = 0; // Placeholder, update with actual logic if available
-        $recentActivities = []; // Placeholder, update with actual logic if available
+        $totalDevices = \App\Models\Device::where('vendor_id', $user->id)->count();
+        $devicesSold = \App\Models\Device::where('vendor_id', $user->id)->whereNotNull('buyer_id')->count();
+        $totalProducts = \App\Models\Product::where('vendor_id', $user->id)->count();
+        $totalFaults = \App\Models\FaultReport::whereIn('device_id', \App\Models\Device::where('vendor_id', $user->id)->pluck('id'))->count();
+        $pendingFaults = \App\Models\FaultReport::whereIn('device_id', \App\Models\Device::where('vendor_id', $user->id)->pluck('id'))->where('status', 'pending')->count();
 
-        return view('dashboards.vendor', compact('totalDevices', 'devicesSold', 'pendingReports', 'monthlySales', 'recentActivities'));
+        $recentDevices = \App\Models\Device::where('vendor_id', $user->id)->latest()->take(5)->get();
+        $recentFaults = \App\Models\FaultReport::whereIn('device_id', \App\Models\Device::where('vendor_id', $user->id)->pluck('id'))->latest()->take(5)->get();
+
+        return view('dashboards.vendor', compact(
+            'totalDevices', 'devicesSold', 'totalProducts', 'totalFaults', 'pendingFaults', 'recentDevices', 'recentFaults'
+        ));
     }
 } 
