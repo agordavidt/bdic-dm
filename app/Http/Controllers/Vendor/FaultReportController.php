@@ -29,4 +29,19 @@ class FaultReportController extends Controller
         $faultReport->update(['status' => 'resolved']);
         return redirect()->route('vendor.fault_reports.show', $faultReport)->with('success', 'Fault marked as resolved.');
     }
+
+    public function destroyMedia($faultReportId, $mediaId)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            abort(403);
+        }
+        $media = \App\Models\FaultReportMedia::where('fault_report_id', $faultReportId)->findOrFail($mediaId);
+        // Delete file from storage
+        if (\Storage::disk('public')->exists($media->file_path)) {
+            \Storage::disk('public')->delete($media->file_path);
+        }
+        $media->delete();
+        return back()->with('success', 'Media file deleted successfully.');
+    }
 } 

@@ -27,16 +27,36 @@ class FaultReportController extends Controller
         $this->authorize('view', $device);
         $validated = $request->validate([
             'description' => 'required|string|max:2000',
-            'image' => 'nullable|image|max:2048',
+            'media.*' => 'nullable|file|max:20480|mimetypes:image/jpeg,image/png,video/mp4,video/quicktime', // 20MB per file
         ]);
-        $imagePath = $request->file('image') ? $request->file('image')->store('fault_reports', 'public') : null;
-        FaultReport::create([
+        
+        $faultReport = FaultReport::create([
             'device_id' => $device->id,
             'user_id' => Auth::id(),
             'description' => $validated['description'],
-            'image_path' => $imagePath,
             'status' => 'open',
         ]);
+        
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+                $mime = $file->getMimeType();
+                $isImage = str_starts_with($mime, 'image/');
+                $isVideo = str_starts_with($mime, 'video/');
+                // For videos, check duration (requires ffprobe or similar for strict check, but skip for now)
+                $mediaType = $isImage ? 'image' : ($isVideo ? 'video' : null);
+                if (!$mediaType) continue;
+                $path = $file->store('fault_reports', 'public');
+                $faultReport->media()->create([
+                    'media_type' => $mediaType,
+                    'file_path' => $path,
+                ]);
+                // For backward compatibility, set image_path if first image
+                if ($isImage && !$faultReport->image_path) {
+                    $faultReport->image_path = $path;
+                    $faultReport->save();
+                }
+            }
+        }
         return redirect()->route('buyer.fault_reports.index')->with('success', 'Fault reported successfully.');
     }
 

@@ -178,6 +178,8 @@ Route::prefix('vendor/fault-reports')->name('vendor.fault_reports.')->middleware
     Route::get('/{faultReport}', [\App\Http\Controllers\Vendor\FaultReportController::class, 'show'])->name('show');
     Route::patch('/{faultReport}/resolve', [\App\Http\Controllers\Vendor\FaultReportController::class, 'resolve'])->name('resolve');
 });
+// Admin Fault Report Media Deletion
+Route::delete('admin/fault-reports/{faultReport}/media/{media}', [\App\Http\Controllers\Vendor\FaultReportController::class, 'destroyMedia'])->middleware(['role:admin'])->name('admin.fault_reports.media.destroy');
 
 // API Routes for AJAX calls
 Route::middleware(['auth'])->prefix('api')->group(function () {

@@ -28,6 +28,12 @@
         Report Fault
     </a>
 </li>
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.fault_reports.*') ? 'active' : '' }}" href="{{ route('buyer.fault_reports.index') }}">
+        <i class="fas fa-clipboard-list"></i>
+        My Fault Reports
+    </a>
+</li>
 <!-- <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.profile.*') ? 'active' : '' }}" href="{{ route('buyer.profile.show') }}">
         <i class="fas fa-user"></i>

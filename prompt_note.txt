@@ -1,141 +1,135 @@
--- migrations
- public function up(): void
-    {
-        Schema::create('device_categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('description')->nullable();
-            $table->timestamps();
-        });
-    }
-
-    Schema::create('devices', function (Blueprint $table) {
-            $table->id();
-            $table->string('unique_identifier')->unique(); // PG or serial number
-            $table->string('device_type');
-            $table->string('model');
-            $table->string('brand')->nullable();
-            $table->text('specifications')->nullable();
-            $table->foreignId('category_id')->constrained('device_categories');
-            $table->foreignId('vendor_id')->constrained('users'); // Vendor who registered
-            $table->foreignId('buyer_id')->nullable()->constrained('users'); // Current owner
-            $table->string('buyer_name')->nullable(); // Vendor-provided buyer name
-            $table->string('buyer_email')->nullable(); // Vendor-provided buyer email
-            $table->string('buyer_phone')->nullable(); // Vendor-provided buyer phone
-            $table->enum('buyer_category', ['individual', 'institution', 'corporate'])->nullable();
-            $table->enum('status', ['active', 'needs_attention', 'replacement_needed', 'stolen'])->default('active');
-            $table->decimal('price', 10, 2)->nullable();
-            $table->date('purchase_date')->nullable();
-            $table->date('warranty_expiry')->nullable();
-            $table->json('metadata')->nullable(); // Additional flexible data
-            $table->timestamps();
-            
-            $table->index(['vendor_id', 'status']);
-            $table->index(['buyer_id', 'status']);
-            $table->index('unique_identifier');
-        });
-
-         public function up(): void
-    {
-        Schema::table('devices', function (Blueprint $table) {
-            //
-        });
-    }
 
 
-    view:
-    @extends('layouts.app')
+Feature 1: Enhanced Media Upload for Faults (Focus: Video & Management)
+Objective: To expand the existing image upload functionality to include video, provide better management of uploaded media, and ensure efficient storage.
+Dependencies:
+Existing Fault Reporting module (currently supports image upload).
+Robust file storage solution (e.g., local storage, cloud storage like AWS S3 or Google Cloud Storage).
+Impact on Existing System: This feature builds directly on the existing image_path field and file storage. It requires extending the existing fault reporting form and display.
+User Stories (by Role):
+As a Buyer (FR_FAULT_002 - Revised): I want to be able to upload a short video demonstrating a device fault when submitting a report so that I can provide dynamic context.
+Acceptance Criteria:
+The fault reporting form clearly indicates that video files (e.g., MP4, MOV) can be uploaded.
+The form limits video file size (e.g., 20MB) and duration (e.g., 30 seconds) and communicates these limits.
+Uploaded video is successfully associated with the fault report.
+Error messages are displayed for invalid file types or exceeding limits.
+As a Vendor (FR_FAULT_003 - Revised): I want to be able to view and play videos attached to fault reports (alongside existing images) so that I can fully understand the reported issue before responding.
 
-@section('title', 'Register Device')
+Acceptance Criteria:
+On the fault report details page, uploaded video(s) are clearly displayed and playable directly within the interface (e.g., HTML5 <video> tag).
+If multiple images/videos are uploaded, they are presented in an organized manner (e.g., a gallery or list).
+As a Manufacturer (FR_FAULT_004 - Revised): I want to be able to view and play videos attached to fault reports so that I can analyze common issues and improve product design.
+Acceptance Criteria: Same as Vendor acceptance criteria for viewing and playing video media.
+As an Admin/Support (FR_FAULT_005 - Revised): I want to be able to view, play, and manage (e.g., delete inappropriate) all media (images and videos) attached to fault reports so that I can ensure content quality and assist in diagnostics.
 
-@section('content')
-<div class="container py-4">
-    <div class="card shadow-sm">
-        <div class="card-header ">
-            <h4 class="card-title mb-0">Register Device</h4>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('devices.store') }}" method="POST" id="device-registration-form">
-                @csrf
-                <div class="row">
-                    <!-- Device Information -->
-                    <div class="col-md-6">
-                        <h5 class="mb-3 ">Device Information</h5>
-                        <div class="mb-3">
-                            <label for="unique_identifier" class="form-label">Unique Identifier</label>
-                            <input type="text" class="form-control" id="unique_identifier" name="unique_identifier" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="device_type" class="form-label">Device Type</label>
-                            <input type="text" class="form-control" id="device_type" name="device_type" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="model" class="form-label">Model</label>
-                            <input type="text" class="form-control" id="model" name="model" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="brand" class="form-label">Brand</label>
-                            <input type="text" class="form-control" id="brand" name="brand">
-                        </div>
-                        <div class="mb-3">
-                            <label for="category_id" class="form-label">Category</label>
-                            <select class="form-select" id="category_id" name="category_id" required>
-                                <option value="">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="number" class="form-control" id="price" name="price" step="0.01">
-                        </div>
-                        <div class="mb-3">
-                            <label for="warranty_expiry" class="form-label">Warranty Expiry</label>
-                            <input type="date" class="form-control" id="warranty_expiry" name="warranty_expiry">
-                        </div>
-                    </div>
+Acceptance Criteria: Admin/Support can access all media on fault reports. Option to delete specific media files (with confirmation).
 
-                    <!-- Buyer Information -->
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">Buyer Information</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="buyer_email" class="form-label">Buyer Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="buyer_email" name="buyer_email" required placeholder="e.g. buyer@email.com">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="buyer_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="buyer_name" name="buyer_name" required placeholder="e.g. John Doe">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="buyer_phone" class="form-label">Phone <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="buyer_phone" name="buyer_phone" required placeholder="e.g. 08012345678">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="buyer_address" class="form-label">Address <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="buyer_address" name="buyer_address" required placeholder="e.g. 123 Main St, City, State">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                       </i>Submit
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
-@push('scripts')
-<script>
-// (Removed buyer lookup/prefill JS)
-</script>
-@endpush
-@endsection
+
+Feature 2: Globalization (i18n & l10n)
+Objective: To make the BDIC Device Management and Tracking System accessible and user-friendly for a diverse audience by supporting multiple languages and region-specific data formats across all modules, including the existing fault reporting, device management, and the new e-commerce system.
+Dependencies:
+A robust application framework (Laravel's i18n is excellent).
+Translation files for all supported languages.
+Impact on Existing System: This feature is pervasive, affecting nearly every UI element and dynamic text display. It does not conflict with existing features but requires a systematic refactoring of text elements across the entire application.
+User Stories (by Role):
+
+As Any User (Admin, Vendor, Buyer, Manufacturer) (FR_GLOBAL_001): I want to be able to select my preferred language (e.g., English, Hausa, Yoruba, Igbo, French, Arabic) from a clear option in the user interface so that I can use the system in my native language.
+
+Acceptance Criteria:
+
+A visible language selector is available (e.g., header, user profile).
+
+Changing the language updates all static text (labels, buttons, titles, messages) immediately.
+
+The selected language preference persists across user sessions (e.g., stored in user profile).
+
+As Any User (FR_GLOBAL_002): I want the system to display dates, times, and currency formats according to my selected region so that information is presented in a familiar and understandable way.
+
+Acceptance Criteria:
+
+All date/time displays (e.g., created_at timestamps on fault reports, order dates in e-commerce) format according to the locale.
+
+Currency displays (e.g., product prices, order totals) use appropriate symbols and separators based on the locale (e.g., ₦1,000.00 vs. 1.000,00₦).
+
+Numbers (e.g., quantities) are formatted with correct decimal/thousands separators.
+
+As Any User (FR_GLOBAL_003): I want all system messages, labels, and static content to be translated into my selected language so that I can fully understand the application.
+
+Acceptance Criteria:
+
+This includes:
+
+Fault report form labels (description, upload fields).
+
+Fault report statuses ('open', 'resolved', any new statuses like 'in_progress').
+
+Device categories, buyer categories.
+
+All e-commerce labels (product name, description, price, cart, checkout, order statuses).
+
+Dashboard headings and navigation links across all roles.
+
+Error messages and success notifications.
+
+As an Admin (FR_GLOBAL_004): I want to be able to manage and add new language translations for system content efficiently so that the platform can support more users globally.
+
+Acceptance Criteria:
+
+Admin dashboard provides an intuitive interface (e.g., a simple CRUD for translation keys, or integration with a dedicated translation management tool) to add/edit translations for different languages.
+
+Ability to export and import translation files for external translation services.
+
+As a BDIC Management & Analytics Team (FR_GLOBAL_005): I want to view localized analytics data (e.g., sales distribution by region, fault report trends by language used) so that I can make region-specific business decisions.
+
+Acceptance Criteria:
+
+Analytics dashboards display textual information (e.g., category names, status names) in the selected administrative language.
+
+If collecting user-reported locale data, this can be used for deeper localized insights.
+
+Technical Considerations:
+
+Laravel's Localization System:
+
+String Replacement: Systematically replace every hardcoded string in all Blade templates (resources/views/*) and controller messages (app/Http/Controllers/*) with Laravel's __() helper.
+
+Example: Instead of <h1>Fault Reports</h1>, use <h1>{{ __('fault_reports.title') }}</h1>.
+
+Example: Instead of return back()->with('success', 'Report submitted successfully.');, use return back()->with('success', __('fault_reports.submit_success'));.
+
+Translation Files: Create and manage translation files for each language (e.g., resources/lang/en/fault_reports.php, resources/lang/ha/fault_reports.php).
+
+Pluralization: Use trans_choice() for strings that need different forms based on count (e.g., "1 device", "2 devices").
+
+Locale Storage & Middleware:
+
+Add a locale column (string, e.g., 'en', 'ha') to the users table to store individual user preferences.
+
+Create a middleware that checks the user's preferred locale (from session or database) and sets App::setLocale() for each request.
+
+Date, Time & Number Formatting:
+
+Use Carbon (Laravel's default date library) with setLocale() for consistent date and time formatting throughout the application.
+
+For currency and general numbers, use PHP's NumberFormatter or a dedicated package that respects the current locale.
+
+Frontend (JavaScript):
+
+If using JavaScript for dynamic content or parts of the UI, implement client-side i18n (e.g., Vue I18n, React-Intl) to ensure consistency. Pass translated strings from Laravel to JavaScript where necessary.
+
+Dynamic Content:
+
+For content stored in the database that needs to be multilingual (e.g., device descriptions if BDIC sells global products and descriptions are translated), this would require a more complex solution (e.g., a translations table for polymorphic relationships, or separate columns for each language description_en, description_ha). For "Globalization" V1, prioritize UI elements; dynamic content translation can be a future phase.
+
+Testing: Thoroughly test all UI elements in each supported language to ensure correct display, alignment (RTL for Arabic if supported), and functionality.
+
+Integration with Existing System & E-commerce:
+
+This is a system-wide refactoring effort. Every existing Blade template (buyer/device_details.blade.php, vendor/dashboard.blade.php, admin/users.blade.php) needs to be reviewed and updated for localization.
+
+All new e-commerce views (products/index.blade.php, cart/show.blade.php, checkout/index.blade.php) must be built with localization from the outset.
+
+Ensure that any data fetched from the database (e.g., status enums like 'open', 'resolved') is translated before being displayed to the user.
+
+This revised plan directly addresses the current state of the fault reporting module, clearly outlining the next steps for media uploads and providing a comprehensive strategy for integrating globalization across the entire platform, including the e-commerce module.

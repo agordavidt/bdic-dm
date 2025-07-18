@@ -6,7 +6,7 @@
 @section('content')
 <div class="container mt-4">
     <h2 class="mb-4">My Fault Reports</h2>
-    <div class="mb-3">
+    <div class="mb-3 d-flex justify-content-end">
         <a href="{{ route('buyer.devices.index') }}" class="btn btn-secondary">← Back to My Devices</a>
     </div>
     <div class="card">

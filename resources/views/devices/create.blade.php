@@ -170,7 +170,7 @@
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ route('devices.index') }}" class="btn btn-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-                        <i class="fas fa-save me-2"></i>Register Device
+                       Register Device
                     </button>
                 </div>
             </form>

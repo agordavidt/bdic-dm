@@ -35,8 +35,11 @@ class DevicePolicy
             return true;
         }
 
-        // Buyers can view devices they own
-        if ($user->role === 'buyer' && $device->buyer_id === $user->id) {
+        // Buyers can view devices they own (by ID or by registered email)
+        if ($user->role === 'buyer' && (
+            $device->buyer_id === $user->id ||
+            (strcasecmp($device->buyer_email, $user->email) === 0)
+        )) {
             return true;
         }
 
