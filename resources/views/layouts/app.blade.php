@@ -104,12 +104,12 @@
                             @endif
 
                             <!-- Common Profile Link -->
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('profile') ? 'active' : '' }}" href="#">
                                     <i class="fas fa-user"></i>
                                     Profile
                                 </a>
-                            </li>
+                            </li> -->
                         </ul>
                         @endauth
                     </div>

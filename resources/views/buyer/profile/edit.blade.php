@@ -14,57 +14,61 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="full_name" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" name="full_name" id="full_name" value="{{ old('full_name', $profile->full_name) }}" required>
+                        <input type="text" class="form-control" name="full_name" id="full_name" value="{{ old('full_name', $profile?->full_name) }}" required>
                     </div>
                     <div class="col-md-6">
                         <label for="phone" class="form-label">Phone</label>
-                        <input type="text" class="form-control" name="phone" id="phone" value="{{ old('phone', $profile->phone) }}" required>
+                        <input type="text" class="form-control" name="phone" id="phone" value="{{ old('phone', $profile?->phone) }}" required>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="address" class="form-label">Address</label>
-                        <input type="text" class="form-control" name="address" id="address" value="{{ old('address', $profile->address) }}" required>
+                        <input type="text" class="form-control" name="address" id="address" value="{{ old('address', $profile?->address) }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="city" class="form-label">City</label>
-                        <input type="text" class="form-control" name="city" id="city" value="{{ old('city', $profile->city) }}" required>
+                        <input type="text" class="form-control" name="city" id="city" value="{{ old('city', $profile?->city) }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="state" class="form-label">State</label>
-                        <input type="text" class="form-control" name="state" id="state" value="{{ old('state', $profile->state) }}" required>
+                        <input type="text" class="form-control" name="state" id="state" value="{{ old('state', $profile?->state) }}" required>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="country" class="form-label">Country</label>
-                        <input type="text" class="form-control" name="country" id="country" value="{{ old('country', $profile->country) }}" required>
+                        <input type="text" class="form-control" name="country" id="country" value="{{ old('country', $profile?->country) }}" required>
                     </div>
                     <div class="col-md-3">
                         <label for="id_type" class="form-label">ID Type</label>
-                        <input type="text" class="form-control" name="id_type" id="id_type" value="{{ old('id_type', $profile->id_type) }}">
+                        <select class="form-select" name="id_type" id="id_type" required>
+                            <option value="" disabled {{ old('id_type', $profile?->id_type) ? '' : 'selected' }}>Select ID Type</option>
+                            <option value="Voter's card" {{ old('id_type', $profile?->id_type) == "Voter's card" ? 'selected' : '' }}>Voter's card</option>
+                            <option value="International passport" {{ old('id_type', $profile?->id_type) == 'International passport' ? 'selected' : '' }}>International passport</option>
+                            <option value="National identity card" {{ old('id_type', $profile?->id_type) == 'National identity card' ? 'selected' : '' }}>National identity card</option>
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label for="id_number" class="form-label">ID Number</label>
-                        <input type="text" class="form-control" name="id_number" id="id_number" value="{{ old('id_number', $profile->id_number) }}">
+                        <input type="text" class="form-control" name="id_number" id="id_number" value="{{ old('id_number', $profile?->id_number) }}">
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label for="buyer_type" class="form-label">Buyer Type</label>
-                        <select class="form-select" name="buyer_type" id="buyer_type" required>
-                            <option value="individual" {{ old('buyer_type', $profile->buyer_type) == 'individual' ? 'selected' : '' }}>Individual</option>
-                            <option value="institution" {{ old('buyer_type', $profile->buyer_type) == 'institution' ? 'selected' : '' }}>Institution</option>
-                            <option value="corporate" {{ old('buyer_type', $profile->buyer_type) == 'corporate' ? 'selected' : '' }}>Corporate</option>
+                        <select class="form-select" name="buyer_type" id="buyer_type">
+                            <option value="individual" {{ old('buyer_type', $profile?->buyer_type ?? 'individual') == 'individual' ? 'selected' : '' }}>Individual</option>
+                            <option value="institution" {{ old('buyer_type', $profile?->buyer_type) == 'institution' ? 'selected' : '' }}>Institution</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="institution_name" class="form-label">Institution Name</label>
-                        <input type="text" class="form-control" name="institution_name" id="institution_name" value="{{ old('institution_name', $profile->institution_name) }}">
+                    <div class="col-md-4 institution-fields" style="display: none;">
+                        <label for="institution_name" class="form-label">Institution Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="institution_name" id="institution_name" value="{{ old('institution_name', $profile?->institution_name) }}">
                     </div>
-                    <div class="col-md-4">
-                        <label for="tax_id" class="form-label">Tax ID</label>
-                        <input type="text" class="form-control" name="tax_id" id="tax_id" value="{{ old('tax_id', $profile->tax_id) }}">
+                    <div class="col-md-4 institution-fields" style="display: none;">
+                        <label for="tax_id" class="form-label">Tax ID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="tax_id" id="tax_id" value="{{ old('tax_id', $profile?->tax_id) }}">
                     </div>
                 </div>
                 <div class="d-flex justify-content-end">
@@ -75,4 +79,29 @@
         </div>
     </form>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function toggleInstitutionFields() {
+        var buyerType = document.getElementById('buyer_type').value;
+        var institutionFields = document.querySelectorAll('.institution-fields');
+        if (buyerType === 'institution') {
+            institutionFields.forEach(function(field) {
+                field.style.display = '';
+                field.querySelector('input').setAttribute('required', 'required');
+            });
+        } else {
+            institutionFields.forEach(function(field) {
+                field.style.display = 'none';
+                field.querySelector('input').removeAttribute('required');
+                field.querySelector('input').value = '';
+            });
+        }
+    }
+    document.getElementById('buyer_type').addEventListener('change', toggleInstitutionFields);
+    window.addEventListener('DOMContentLoaded', function() {
+        toggleInstitutionFields();
+    });
+</script>
 @endsection 

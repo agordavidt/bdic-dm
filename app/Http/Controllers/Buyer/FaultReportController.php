@@ -19,12 +19,24 @@ class FaultReportController extends Controller
     public function create(Device $device)
     {
         $this->authorize('view', $device);
+        $user = Auth::user();
+        $profile = $user->buyerProfile;
+        if (!$profile || !$profile->isComplete()) {
+            return redirect()->route('buyer.profile.edit')
+                ->with('warning', 'Please complete your profile before reporting a fault.');
+        }
         return view('buyer.fault_reports.create', compact('device'));
     }
 
     public function store(Request $request, Device $device)
     {
         $this->authorize('view', $device);
+        $user = Auth::user();
+        $profile = $user->buyerProfile;
+        if (!$profile || !$profile->isComplete()) {
+            return redirect()->route('buyer.profile.edit')
+                ->with('warning', 'Please complete your profile before reporting a fault.');
+        }
         $validated = $request->validate([
             'description' => 'required|string|max:2000',
             'media.*' => 'nullable|file|max:20480|mimetypes:image/jpeg,image/png,video/mp4,video/quicktime', // 20MB per file

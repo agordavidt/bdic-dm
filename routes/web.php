@@ -98,8 +98,7 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Public Product Catalog - accessible to all authenticated users
-    // FR_ECO_006: Browse products by categories
-    // FR_ECO_007: View detailed product information
+
     Route::prefix('products')->name('products.')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/{product}', [ProductController::class, 'show'])->name('show');
@@ -110,8 +109,7 @@ Route::middleware(['auth'])->group(function () {
     // Buyer-Specific Routes - Views will be in resources/views/buyer/
     Route::middleware(['role:buyer'])->group(function () {
         
-        // Shopping Cart Routes - FR_ECO_008, FR_ECO_009
-        // Views: resources/views/buyer/cart/
+
         Route::prefix('buyer/cart')->name('buyer.cart.')->group(function () {
             Route::get('/', [CartController::class, 'index'])->name('index');
             Route::post('/add', [CartController::class, 'add'])->name('add');

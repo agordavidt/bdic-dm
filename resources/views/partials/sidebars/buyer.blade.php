@@ -7,19 +7,19 @@
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.products.*') ? 'active' : '' }}" href="{{ route('buyer.products.index') }}">
         <i class="fas fa-th-list"></i>
-        Product Catalog
+        Products
     </a>
 </li>
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.cart.*') ? 'active' : '' }}" href="{{ route('buyer.cart.index') }}">
         <i class="fas fa-shopping-cart"></i>
-        My Cart
+        Cart
     </a>
 </li>
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.orders.*') ? 'active' : '' }}" href="{{ route('buyer.orders.index') }}">
         <i class="fas fa-box"></i>
-        My Orders
+        Orders
     </a>
 </li>
 <li class="nav-item">
@@ -31,12 +31,14 @@
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.fault_reports.*') ? 'active' : '' }}" href="{{ route('buyer.fault_reports.index') }}">
         <i class="fas fa-clipboard-list"></i>
-        My Fault Reports
+        Fault Reports
     </a>
 </li>
-<!-- <li class="nav-item">
+<li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.profile.*') ? 'active' : '' }}" href="{{ route('buyer.profile.show') }}">
         <i class="fas fa-user"></i>
-        My Profile
+        Profile
     </a>
-</li> -->
+</li>
+
+

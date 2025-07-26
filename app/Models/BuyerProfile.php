@@ -53,4 +53,32 @@ class BuyerProfile extends Model
     {
         return "{$this->address}, {$this->city}, {$this->state}, {$this->country}";
     }
+
+    /**
+     * Check if the buyer profile is complete for support/fault reporting.
+     */
+    public function isComplete(): bool
+    {
+        $required = [
+            $this->full_name,
+            $this->phone,
+            $this->address,
+            $this->city,
+            $this->state,
+            $this->country,
+            $this->id_type,
+            $this->id_number,
+        ];
+        // If buyer_type is 'institution', require institution_name and tax_id
+        if ($this->buyer_type === 'institution') {
+            $required[] = $this->institution_name;
+            $required[] = $this->tax_id;
+        }
+        foreach ($required as $value) {
+            if (empty($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
