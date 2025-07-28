@@ -46,3 +46,54 @@
         Report Fault
     </a>
 </li>
+
+
+
+
+
+
+
+
+<!-- <li class="nav-item nav-category">Admin Dashboard</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="#">
+        <i class="menu-icon mdi mdi-account-group"></i>
+        <span class="menu-title">User Management</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">
+        <i class="menu-icon mdi mdi-package-variant-closed"></i>
+        <span class="menu-title">Product Catalog</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">
+        <i class="menu-icon mdi mdi-cart"></i>
+        <span class="menu-title">Order Management</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}" href="{{ route('admin.analytics.index') }}">
+        <i class="menu-icon mdi mdi-chart-line"></i>
+        <span class="menu-title">Analytics</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('devices.index') ? 'active' : '' }}" href="{{ route('devices.index') }}">
+        <i class="menu-icon mdi mdi-cellphone"></i>
+        <span class="menu-title">Device Management</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('admin.faults.*') ? 'active' : '' }}" href="#">
+        <i class="menu-icon mdi mdi-alert-circle-outline"></i>
+        <span class="menu-title">Report Fault</span>
+    </a>
+</li> -->

@@ -63,3 +63,5 @@ Policies: Fine-grained control over who can view, update, transfer, or delete de
 Summary
 The BDIC Device Management System is a robust, role-driven platform for tracking devices from sale to end-of-life, supporting after-sales service, and providing actionable insights for management. The flow is centered around device registration, ownership transfer, fault reporting, and analytics, with each user role having a clear set of capabilities and dashboards.
 If you want a diagram or a more technical breakdown of any specific flow (e.g., device registration, fault reporting), let me know!
+
+

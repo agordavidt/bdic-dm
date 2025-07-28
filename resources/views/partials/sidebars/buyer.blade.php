@@ -42,3 +42,49 @@
 </li>
 
 
+
+
+
+<!-- <li class="nav-item nav-category">Buyer Dashboard</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.products.*') ? 'active' : '' }}" href="{{ route('buyer.products.index') }}">
+        <i class="menu-icon mdi mdi-view-list"></i>
+        <span class="menu-title">Products</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.cart.*') ? 'active' : '' }}" href="{{ route('buyer.cart.index') }}">
+        <i class="menu-icon mdi mdi-cart"></i>
+        <span class="menu-title">Cart</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.orders.*') ? 'active' : '' }}" href="{{ route('buyer.orders.index') }}">
+        <i class="menu-icon mdi mdi-package-variant-closed"></i>
+        <span class="menu-title">Orders</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.devices.index') ? 'active' : '' }}" href="{{ route('buyer.devices.index') }}">
+        <i class="menu-icon mdi mdi-alert-circle-outline"></i>
+        <span class="menu-title">Report Fault</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.fault_reports.*') ? 'active' : '' }}" href="{{ route('buyer.fault_reports.index') }}">
+        <i class="menu-icon mdi mdi-clipboard-text"></i>
+        <span class="menu-title">Fault Reports</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('buyer.profile.*') ? 'active' : '' }}" href="{{ route('buyer.profile.show') }}">
+        <i class="menu-icon mdi mdi-account"></i>
+        <span class="menu-title">Profile</span>
+    </a>
+</li> -->
