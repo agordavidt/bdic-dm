@@ -1,51 +1,90 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'My Profile')
 @section('page-title', 'My Profile')
 
 @section('content')
-<div class="container py-4">
-    <h2 class="mb-4">Profile</h2>
-    <div class="card">
-        <div class="card-body">
-            @if(!$profile)
-                <div class="alert alert-warning mb-3">
-                    Your profile is not yet created. <a href="{{ route('buyer.profile.edit') }}">Click here to complete your profile.</a>
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 grid-margin stretch-card">
+            <div class="card card-rounded">
+                <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title card-title-dash">My Profile</h4>
+                            <p class="card-subtitle card-subtitle-dash">Your personal information</p>
+                        </div>
+                        <div>
+                            <a href="{{ route('buyer.profile.edit') }}" class="btn btn-primary btn-lg text-white mb-0 me-0">
+                                <i class="mdi mdi-pencil"></i> Edit Profile
+                            </a>
+                        </div>
+                    </div>
+
+                    @if(!$profile)
+                        <div class="alert alert-warning mt-4">
+                            <i class="mdi mdi-alert-circle-outline"></i> Your profile is not yet created. 
+                            <a href="{{ route('buyer.profile.edit') }}" class="alert-link">Click here to complete your profile.</a>
+                        </div>
+                    @else
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Full Name:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $profile->full_name }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Email:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $user->email }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Phone:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $profile->phone }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Address:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $profile->address }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">City:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $profile->city }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">State:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $profile->state }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Country:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ $profile->country }}</p>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Buyer Type:</label>
+                                    <div class="col-sm-8">
+                                        <p class="form-control-plaintext">{{ ucfirst($profile->buyer_type) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
-            @else
-                <dl class="row">
-                    <dt class="col-sm-3">Full Name</dt>
-                    <dd class="col-sm-9">{{ $profile->full_name }}</dd>
-                    <dt class="col-sm-3">Email</dt>
-                    <dd class="col-sm-9">{{ $user->email }}</dd>
-                    <dt class="col-sm-3">Phone</dt>
-                    <dd class="col-sm-9">{{ $profile->phone }}</dd>
-                    <dt class="col-sm-3">Address</dt>
-                    <dd class="col-sm-9">{{ $profile->address }}</dd>
-                    <dt class="col-sm-3">City</dt>
-                    <dd class="col-sm-9">{{ $profile->city }}</dd>
-                    <dt class="col-sm-3">State</dt>
-                    <dd class="col-sm-9">{{ $profile->state }}</dd>
-                    <dt class="col-sm-3">Country</dt>
-                    <dd class="col-sm-9">{{ $profile->country }}</dd>
-                    <dt class="col-sm-3">ID Type</dt>
-                    <dd class="col-sm-9">{{ $profile->id_type }}</dd>
-                    <dt class="col-sm-3">ID Number</dt>
-                    <dd class="col-sm-9">{{ $profile->id_number }}</dd>
-                    <dt class="col-sm-3">Buyer Type</dt>
-                    <dd class="col-sm-9">{{ ucfirst($profile->buyer_type) }}</dd>
-                    @if($profile->institution_name)
-                    <dt class="col-sm-3">Institution Name</dt>
-                    <dd class="col-sm-9">{{ $profile->institution_name }}</dd>
-                    @endif
-                    @if($profile->tax_id)
-                    <dt class="col-sm-3">Tax ID</dt>
-                    <dd class="col-sm-9">{{ $profile->tax_id }}</dd>
-                    @endif
-                </dl>
-                <a href="{{ route('buyer.profile.edit') }}" class="btn btn-primary">Edit Profile</a>
-            @endif
+            </div>
         </div>
     </div>
 </div>
-@endsection 
+@endsection

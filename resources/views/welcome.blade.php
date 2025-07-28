@@ -721,7 +721,8 @@
                 All rights reserved. <a href="/">bdic-dms</a>
               </div>
               <div class="col-xl-4 justify-content-start justify-content-xl-end quick-links d-flex flex-column flex-xl-row text-center text-xl-start gap-1">
-                Powered by <a href="https://bdic.com" target="_blank">BDIC</a>
+                Powered by <a href="https://bdic.com" target="_blank"><img src="{{ asset('assets/images/bdic-logo3.png') }}" alt="BDIC Logo" style="height: 40px;"></a>
+
               </div>
             </div>
           </div>

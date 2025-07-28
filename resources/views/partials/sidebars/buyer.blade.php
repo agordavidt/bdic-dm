@@ -4,7 +4,7 @@
         Dashboard
     </a>
 </li> -->
-<li class="nav-item">
+<!-- <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.products.*') ? 'active' : '' }}" href="{{ route('buyer.products.index') }}">
         <i class="fas fa-th-list"></i>
         Products
@@ -39,13 +39,13 @@
         <i class="fas fa-user"></i>
         Profile
     </a>
-</li>
+</li> -->
 
 
 
 
 
-<!-- <li class="nav-item nav-category">Buyer Dashboard</li>
+<li class="nav-item nav-category">Buyer Dashboard</li>
 
 <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('buyer.products.*') ? 'active' : '' }}" href="{{ route('buyer.products.index') }}">
@@ -87,4 +87,4 @@
         <i class="menu-icon mdi mdi-account"></i>
         <span class="menu-title">Profile</span>
     </a>
-</li> -->
+</li>

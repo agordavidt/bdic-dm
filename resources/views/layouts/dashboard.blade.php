@@ -58,7 +58,7 @@
                 <div>
                     <a class="navbar-brand brand-logo" href="#">
                         <!-- <img src="{{ asset('backend/images/logo.svg') }}" alt="BDSMS Logo" /> -->
-                        <span class="navbar-brand-text ms-2">BDSMS</span>
+                        <span class="navbar-brand-text ms-2">BDMS</span>
                     </a>
                     <a class="navbar-brand brand-logo-mini" href="#">
                         <img src="{{ asset('backend/images/logo-mini.svg') }}" alt="BDSMS" />
@@ -144,7 +144,20 @@
                         @else
                             @include('partials.sidebars.common')
                         @endif
-                    @endauth                   
+                    
+                    
+                    <!-- Logout Button -->
+                    <li class="nav-item mt-auto" style="margin-top: auto;">
+                            <a class="nav-link text-danger" href="{{ route('logout') }}"
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="mdi mdi-logout menu-icon text-danger"></i>
+                                <span class="menu-title">Logout</span>
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </li>
+                    @endauth            
                     
                 </ul>
             </nav>
@@ -209,7 +222,8 @@
                             © {{ date('Y') }} Benue State Device Management System. All rights reserved.
                         </span>
                         <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">
-                            Developed by <a href="#" target="_blank">BDSMS Team</a>
+                            Developed by <a href="#" target="_blank"><img src="{{ asset('assets/images/bdic-logo3.png') }}" alt="BDIC Logo" style="height: 40px;"></a>
+                           
                         </span>
                     </div>
                 </footer>

@@ -1,4 +1,4 @@
-<li class="nav-item">
+<!-- <li class="nav-item">
     <a class="nav-link {{ request()->routeIs('device-categories.index') ? 'active' : '' }}" href="{{ route('device-categories.index') }}">
         <i class="fas fa-tags"></i>
         Device Categories
@@ -52,13 +52,13 @@
         <i class="fas fa-chart-pie"></i>
         Analytics
     </a>
-</li>
+</li> -->
 
 
 
 
 <!-- Manufacturer Navigation Category -->
-<!-- <li class="nav-item nav-category">Manufacturer Dashboard</li>
+<li class="nav-item nav-category">Manufacturer Dashboard</li>
 
 
 <li class="nav-item">
@@ -121,4 +121,4 @@
         <i class="menu-icon mdi mdi-chart-donut"></i>
         <span class="menu-title">Analytics</span>
     </a>
-</li> -->
+</li>
